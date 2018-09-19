@@ -31,9 +31,10 @@ int main()
 	FPSCameraf camera(0.5f * glm::half_pi<float>(),
 	                  static_cast<float>(config::resolution_x) / static_cast<float>(config::resolution_y),
 	                  0.01f, 1000.0f);
-	//camera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
+	camera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	camera.mMouseSensitivity = 0.003f;
 	camera.mMovementSpeed = 0.25f * 12.0f;
+	camera.mWorld.SetRotateX(0.0f); camera.mWorld.SetRotateY(0.0f); camera.mWorld.SetRotateZ(0.0f);
 
 	//
 	// Set up the windowing system and create the window
@@ -82,42 +83,71 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	// set up the solar system nodes
+	//
+	// Create node tree
+	//
 	Node solar_system_node;
 		Node sun_node;
-		solar_system_node.add_child(&sun_node);
-		Node earth_moon_pivot_node;
-		solar_system_node.add_child(&earth_moon_pivot_node);
-			Node earth_moon_translate_node;
-			earth_moon_pivot_node.add_child(&earth_moon_translate_node);
-				Node earth_node;
-				earth_moon_translate_node.add_child(&earth_node);
-				Node moon_pivot_node;
-				earth_moon_translate_node.add_child(&moon_pivot_node);
+			solar_system_node.add_child(&sun_node);
+		Node earth_pivot;
+			solar_system_node.add_child(&earth_pivot);
+			Node earth_center;
+				earth_pivot.add_child(&earth_center);
+				Node earth_axis;
+					earth_center.add_child(&earth_axis);
+					Node earth_node;
+						earth_axis.add_child(&earth_node);
+				Node moon_pivot;
+					earth_center.add_child(&moon_pivot);
 					Node moon_node;
-					moon_pivot_node.add_child(&moon_node);
+						moon_pivot.add_child(&moon_node);
+		Node space;
+			solar_system_node.add_child(&space);
 
 
+	//
+	// Set up the nodes and other related attributes
+	//
+	// Sun
 	sun_node.set_geometry(sphere);
-	earth_node.set_geometry(sphere);
-	moon_node.set_geometry(sphere);
+	sun_node.set_scaling(glm::vec3(1.0f, 1.0f, 1.0f));// Sun scaling
+	float const sun_spin_speed = glm::two_pi<float>() / 2.0f; // Full rotation in six seconds
 	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png");
-	GLuint const earth_texture = bonobo::loadTexture2D("earth_diffuse.png");
-	GLuint const moon_texture = bonobo::loadTexture2D("noise.png");
 	sun_node.add_texture("diffuse_texture", sun_texture, GL_TEXTURE_2D);
-	earth_node.add_texture("diffuse_texture", earth_texture, GL_TEXTURE_2D);
-	moon_node.add_texture("diffuse_texture", moon_texture, GL_TEXTURE_2D);
-	float const sun_spin_speed = glm::two_pi<float>() / 18.0f; // Full rotation in twelwe seconds
-	float const earth_moon_pivot_spin_speed = glm::two_pi<float>() / 12.0f; //Full rotation in six seconds
-	float const earth_moon_translate_compensate_spin_speed = -earth_moon_pivot_spin_speed;
-	float const earth_spin_speed = glm::two_pi<float>() / 3.0f;
-	float const moon_pivot_spin_speed = glm::two_pi<float>() / 2.0f; //Full rotation in two seconds
-	earth_moon_translate_node.set_translation(glm::vec3(3.0f, 0.0f, 0.0f));
-	moon_node.set_translation(glm::vec3(0.5f, 0.0f, 0.0f));
-	earth_node.set_scaling(glm::vec3(0.2f, 0.2f, 0.2f));
-	moon_node.set_scaling(glm::vec3(0.05f, 0.05f, 0.05f));
-	earth_node.rotate_z(2.0f/4.0f);
 	
+	// earth pivot
+	float const earth_pivot_spin_speed = glm::two_pi<float>() / 20.0f;
+
+	// earth center
+	earth_center.set_translation(glm::vec3(4.0f, 0.0f, 0.0f));
+	float const earth_center_spin_speed = -earth_pivot_spin_speed;
+
+	// earth axis
+	earth_axis.set_rotation_z(glm::pi<float>() / 6);
+
+	// earth
+	earth_node.set_geometry(sphere);
+	earth_node.scale(glm::vec3(0.5f, 0.5f, 0.5f));
+	float const earth_spin_speed = glm::two_pi<float>() / 1.0f;
+	GLuint const earth_texture = bonobo::loadTexture2D("earthmap.png");
+	earth_node.add_texture("diffuse_texture", earth_texture, GL_TEXTURE_2D);
+	
+
+	// moon pivot
+	float const moon_pivot_spin_speed = glm::two_pi<float>() / 6.0f;
+
+	// moon
+	moon_node.set_geometry(sphere);
+	moon_node.scale(glm::vec3(0.15f, 0.15f, 0.15f));
+	moon_node.set_translation(glm::vec3(1.0f, 0.0f, 0.0f));
+	GLuint const moon_texture = bonobo::loadTexture2D("moonmap.png");
+	moon_node.add_texture("diffuse_texture", moon_texture, GL_TEXTURE_2D);
+
+	// space
+	space.set_geometry(sphere);
+	space.scale(glm::vec3(30.0f, 30.0f, 30.0f));
+	GLuint const space_texture = bonobo::loadTexture2D("stars.png");
+	space.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
 
 
 	glViewport(0, 0, config::resolution_x, config::resolution_y);
@@ -180,17 +210,28 @@ int main()
 		// Update the transforms
 		//
 		sun_node.rotate_y(sun_spin_speed * delta_time);
-		earth_moon_pivot_node.rotate_y(earth_moon_pivot_spin_speed * delta_time);
+
+		earth_pivot.rotate_y(earth_pivot_spin_speed * delta_time);
+
+		earth_center.rotate_y(earth_center_spin_speed * delta_time);
+
 		earth_node.rotate_y(earth_spin_speed * delta_time);
-		moon_pivot_node.rotate_y(moon_pivot_spin_speed * delta_time);
-		earth_moon_translate_node.rotate_y(earth_moon_translate_compensate_spin_speed * delta_time);
 
-		glm::mat4 earth_pos_world = earth_moon_pivot_node.get_transform()*earth_moon_translate_node.get_transform()*earth_node.get_transform();
-		//std::cout << '[' << earth_pos_world[3][0] << ", " << earth_pos_world[3][1] << ", " << earth_pos_world[3][1] << ", " << earth_pos_world[3][3] << ']' << std::endl;
-		camera.mWorld.SetTranslate(glm::vec3(earth_pos_world[3][0] / earth_pos_world[3][3],
-			earth_pos_world[3][1] / earth_pos_world[3][3],
-			earth_pos_world[3][2] / earth_pos_world[3][3]) + 1.0f);
+		moon_pivot.rotate_y(moon_pivot_spin_speed * delta_time);
 
+		// fix camera position near earth
+		glm::mat4 earth_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
+		printf("\033c");
+		printf("earth center:\n[%f, %f, %f, %f]\n \n",earth_pos_world[3][0],earth_pos_world[3][1],earth_pos_world[3][1],earth_pos_world[3][3]);
+		float zt = 3.0f;
+		camera.mWorld.SetTranslate(glm::vec3(earth_pos_world[3][0]/earth_pos_world[3][3] - zt,
+			-zt,
+			earth_pos_world[3][2]/earth_pos_world[3][3]) + zt);
+		glm::mat4 camo = camera.mWorld.GetMatrix();
+		printf("cam rot:\n[%f, %f, %f\n%f, %f, %f\n%f, %f, %f]\n \n", camo[0][0], camo[0][1], camo[0][2],
+			camo[1][0],camo[1][1], camo[1][2],
+			camo[2][0], camo[2][1], camo[2][2]);
+		printf("cam pos:\n[%f, %f, %f, %f]\n \n", camo[3][0], camo[3][1], camo[3][2], camo[3][3]);
 		
 
 		//
@@ -198,31 +239,31 @@ int main()
 		//
 		std::stack<Node const*> node_stack({ &solar_system_node });
 		std::stack<glm::mat4> matrix_stack({ glm::mat4(1.0f) });
+
+		Node const* current = NULL;
+
 		while (!node_stack.empty()) {
-			Node const* top_node = node_stack.top();
+			current = node_stack.top();
 			node_stack.pop();
-			if (top_node->get_children_nb() == 0) {
-				top_node->render(camera.GetWorldToClipMatrix(), matrix_stack.top(), shader, [](GLuint /*program*/) {});
+			// Render if leaf
+			if (current->get_children_nb() == 0) {
+				current->render(camera.GetWorldToClipMatrix(), matrix_stack.top(), shader, [](GLuint /*program*/) {});
 				matrix_stack.pop();
 			}
 			else {
-				glm::mat4 top_matrix = matrix_stack.top();
+				glm::mat4 parent_transform = matrix_stack.top();
 				matrix_stack.pop();
-				for (int i = 0; i < top_node->get_children_nb(); i++) {
-					node_stack.push(top_node->get_child(i));
-					matrix_stack.push(top_matrix*top_node->get_child(i)->get_transform());
+				// Add children to stack
+				for ( int i = 0; i < current->get_children_nb(); i++){
+					node_stack.push(current->get_child(i));
+					matrix_stack.push(parent_transform * current->get_child(i)->get_transform());
 				}
 			}
 
-
 		}
 
-
-		// TODO: Replace this explicit rendering of the Sun with a
-		// traversal of the scene graph and rendering of all its nodes.
-		//sun_node.render(camera.GetWorldToClipMatrix(), sun_node.get_transform(), shader, [](GLuint /*program*/){});
-		//earth_node.render(camera.GetWorldToClipMatrix(), earth_moon_pivot_node.get_transform()*earth_moon_translate_node.get_transform()*earth_node.get_transform(), shader, [](GLuint /*program*/) {});
-		//moon_node.render(camera.GetWorldToClipMatrix(), earth_moon_pivot_node.get_transform()*earth_moon_translate_node.get_transform()*moon_pivot_node.get_transform()*moon_node.get_transform(), shader, [](GLuint /*program*/) {});
+		
+		//
 		// Display Dear ImGui windows
 		//
 		if (show_logs)
