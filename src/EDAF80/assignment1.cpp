@@ -34,6 +34,8 @@ int main()
 	camera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	camera.mMouseSensitivity = 0.003f;
 	camera.mMovementSpeed = 0.25f * 12.0f;
+	camera.mWorld.SetRotateX(0.0f); camera.mWorld.SetRotateY(0.0f); camera.mWorld.SetRotateZ(0.0f);
+
 
 	//
 	// Set up the windowing system and create the window
@@ -100,11 +102,12 @@ int main()
 					earth_center.add_child(&moon_pivot);
 					Node moon_node;
 						moon_pivot.add_child(&moon_node);
-
+		Node space;
+			solar_system_node.add_child(&space);
 
 
 	//
-	// Set up the sun node and other related attributes
+	// Set up the nodes and other related attributes
 	//
 	// Sun
 	sun_node.set_geometry(sphere);
@@ -140,6 +143,12 @@ int main()
 	moon_node.set_translation(glm::vec3(1.0f, 0.0f, 0.0f));
 	GLuint const moon_texture = bonobo::loadTexture2D("moonmap.png");
 	moon_node.add_texture("diffuse_texture", moon_texture, GL_TEXTURE_2D);
+
+	// space
+	space.set_geometry(sphere);
+	space.scale(glm::vec3(30.0f, 30.0f, 30.0f));
+	GLuint const space_texture = bonobo::loadTexture2D("stars.png");
+	space.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
 
 	glViewport(0, 0, config::resolution_x, config::resolution_y);
 	glClearDepthf(1.0f);
@@ -210,7 +219,20 @@ int main()
 
 		moon_pivot.rotate_y(moon_pivot_spin_speed * delta_time);
 
-
+		// fix camera position near earth
+		glm::mat4 earth_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
+		printf("\033c");
+		printf("earth center:\n[%f, %f, %f, %f]\n \n",earth_pos_world[3][0],earth_pos_world[3][1],earth_pos_world[3][1],earth_pos_world[3][3]);
+		float zt = 3.0f;
+		camera.mWorld.SetTranslate(glm::vec3(earth_pos_world[3][0]/earth_pos_world[3][3] - zt,
+			-zt,
+			earth_pos_world[3][2]/earth_pos_world[3][3]) + zt);
+		glm::mat4 camo = camera.mWorld.GetMatrix();
+		printf("cam rot:\n[%f, %f, %f\n%f, %f, %f\n%f, %f, %f]\n \n", camo[0][0], camo[0][1], camo[0][2],
+			camo[1][0],camo[1][1], camo[1][2],
+			camo[2][0], camo[2][1], camo[2][2]);
+		printf("cam pos:\n[%f, %f, %f, %f]\n \n", camo[3][0], camo[3][1], camo[3][2], camo[3][3]);
+		
 
 		//
 		// Traverse the scene graph and render all nodes
@@ -220,6 +242,7 @@ int main()
 		std::stack<int> childnbr({ -1 });
 		Node const* current = NULL;
 
+		if (false) {
 		while (!node_stack.empty()) {
 			// set current to next child if there is one
 			if (((int)node_stack.top()->get_children_nb() - 1) > childnbr.top()) {
@@ -230,11 +253,12 @@ int main()
 			while (current != NULL) {
 				node_stack.push(current);
 				childnbr.push(-1);
-				matrix_stack.push( matrix_stack.top() * current->get_transform());
+				matrix_stack.push(matrix_stack.top() * current->get_transform());
 				if (node_stack.top()->get_children_nb() != 0) {
 					childnbr.top() += 1;
 					current = node_stack.top()->get_child(childnbr.top());
-				}else{
+				}
+				else {
 					current = NULL;
 				}
 			}
@@ -246,6 +270,26 @@ int main()
 			childnbr.pop();
 			node_stack.pop();
 			matrix_stack.pop();
+		}
+	}
+		while (!node_stack.empty()) {
+			current = node_stack.top();
+			node_stack.pop();
+			// Render if leaf
+			if (current->get_children_nb() == 0) {
+				current->render(camera.GetWorldToClipMatrix(), matrix_stack.top(), shader, [](GLuint /*program*/) {});
+				matrix_stack.pop();
+			}
+			else {
+				glm::mat4 parent_transform = matrix_stack.top();
+				matrix_stack.pop();
+				// Add children to stack
+				for ( int i = 0; i < current->get_children_nb(); i++){
+					node_stack.push(current->get_child(i));
+					matrix_stack.push(parent_transform * current->get_child(i)->get_transform());
+				}
+			}
+
 		}
 
 		
