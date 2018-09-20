@@ -34,7 +34,7 @@ int main()
 	camera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	camera.mMouseSensitivity = 0.003f;
 	camera.mMovementSpeed = 0.25f * 12.0f;
-	
+
 	//
 	// Set up the windowing system and create the window
 	//
@@ -230,14 +230,18 @@ int main()
 		printf("\033c");
 		printf("earth center:\n[%f, %f, %f, %f]\n \n",node_pos_world[3][0],node_pos_world[3][1],node_pos_world[3][2],node_pos_world[3][3]);
 		float zt = 3.0f;
-		camera.mWorld.SetTranslate(glm::vec3(node_pos_world[3][0]/node_pos_world[3][3] - zt,
-			-zt,
+		//camera.mWorld.SetTranslate(glm::vec3(earth_pos_world[3][0]/earth_pos_world[3][3] - zt,
+		//	-zt,
+		//	earth_pos_world[3][2]/earth_pos_world[3][3]) + zt);
+		camera.mWorld.SetTranslate(glm::vec3(node_pos_world[3][0]/node_pos_world[3][3], 0,
 			node_pos_world[3][2]/node_pos_world[3][3]) + zt);
 		glm::mat4 camo = camera.mWorld.GetMatrix();
 		printf("cam rot:\n[%f, %f, %f\n%f, %f, %f\n%f, %f, %f]\n \n", camo[0][0], camo[0][1], camo[0][2],
 			camo[1][0],camo[1][1], camo[1][2],
 			camo[2][0], camo[2][1], camo[2][2]);
 		printf("cam pos:\n[%f, %f, %f, %f]\n \n", camo[3][0], camo[3][1], camo[3][2], camo[3][3]);
+		camera.mWorld.LookAt(glm::vec3(node_pos_world[3][0] / node_pos_world[3][3], 0,
+			node_pos_world[3][2] / node_pos_world[3][3]), glm::vec3(0, 1, 0));
 		
 
 		//
