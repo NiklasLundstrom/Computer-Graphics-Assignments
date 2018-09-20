@@ -34,8 +34,7 @@ int main()
 	camera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	camera.mMouseSensitivity = 0.003f;
 	camera.mMovementSpeed = 0.25f * 12.0f;
-	camera.mWorld.SetRotateX(0.0f); camera.mWorld.SetRotateY(0.0f); camera.mWorld.SetRotateZ(0.0f);
-
+	
 	//
 	// Set up the windowing system and create the window
 	//
@@ -150,6 +149,9 @@ int main()
 	space.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
 
 
+	glm::mat4 node_pos_world;
+	int chosen_node = 2;
+
 	glViewport(0, 0, config::resolution_x, config::resolution_y);
 	glClearDepthf(1.0f);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -192,7 +194,9 @@ int main()
 			show_logs = !show_logs;
 		if (input_handler.GetKeycodeState(GLFW_KEY_F2) & JUST_RELEASED)
 			show_gui = !show_gui;
+		if (input_handler.GetKeycodeState(GLFW_KEY_1) & JUST_RELEASED) {
 
+		}
 
 		//
 		// Start a new frame for Dear ImGui
@@ -220,13 +224,15 @@ int main()
 		moon_pivot.rotate_y(moon_pivot_spin_speed * delta_time);
 
 		// fix camera position near earth
-		glm::mat4 earth_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
+		glm::mat4 node_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
+
+
 		printf("\033c");
-		printf("earth center:\n[%f, %f, %f, %f]\n \n",earth_pos_world[3][0],earth_pos_world[3][1],earth_pos_world[3][1],earth_pos_world[3][3]);
+		printf("earth center:\n[%f, %f, %f, %f]\n \n",node_pos_world[3][0],node_pos_world[3][1],node_pos_world[3][2],node_pos_world[3][3]);
 		float zt = 3.0f;
-		camera.mWorld.SetTranslate(glm::vec3(earth_pos_world[3][0]/earth_pos_world[3][3] - zt,
+		camera.mWorld.SetTranslate(glm::vec3(node_pos_world[3][0]/node_pos_world[3][3] - zt,
 			-zt,
-			earth_pos_world[3][2]/earth_pos_world[3][3]) + zt);
+			node_pos_world[3][2]/node_pos_world[3][3]) + zt);
 		glm::mat4 camo = camera.mWorld.GetMatrix();
 		printf("cam rot:\n[%f, %f, %f\n%f, %f, %f\n%f, %f, %f]\n \n", camo[0][0], camo[0][1], camo[0][2],
 			camo[1][0],camo[1][1], camo[1][2],
