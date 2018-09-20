@@ -163,6 +163,8 @@ int main()
 	bool show_logs = true;
 	bool show_gui = true;
 
+	int chosen_node = 2;
+
 	while (!glfwWindowShouldClose(window)) {
 		//
 		// Compute timings information
@@ -218,23 +220,30 @@ int main()
 
 		moon_pivot.rotate_y(moon_pivot_spin_speed * delta_time);
 
+		glm::mat4 node_pos_world;
 		// fix camera position near earth
-		glm::mat4 earth_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
+		if (chosen_node == 1) {
+			glm::mat4 node_pos_world = glm::mat4(1.0f);
+		}
+		else if (chosen_node == 2) {
+			glm::mat4 node_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
+		}
+		else {
+			glm::mat4 node_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*moon_pivot.get_transform()*moon_node.get_transform();
+		}
+
 		printf("\033c");
-		printf("earth center:\n[%f, %f, %f, %f]\n \n",earth_pos_world[3][0],earth_pos_world[3][1],earth_pos_world[3][2],earth_pos_world[3][3]);
+		printf("node center:\n[%f, %f, %f, %f]\n \n",node_pos_world[3][0],node_pos_world[3][1],node_pos_world[3][2],node_pos_world[3][3]);
 		float zt = 3.0f;
-		//camera.mWorld.SetTranslate(glm::vec3(earth_pos_world[3][0]/earth_pos_world[3][3] - zt,
-		//	-zt,
-		//	earth_pos_world[3][2]/earth_pos_world[3][3]) + zt);
-		camera.mWorld.SetTranslate(glm::vec3(earth_pos_world[3][0]/earth_pos_world[3][3], 0,
-			earth_pos_world[3][2]/earth_pos_world[3][3]) + zt);
+		camera.mWorld.SetTranslate(glm::vec3(node_pos_world[3][0]/node_pos_world[3][3], 0,
+			node_pos_world[3][2]/node_pos_world[3][3] + zt));
 		glm::mat4 camo = camera.mWorld.GetMatrix();
 		printf("cam rot:\n[%f, %f, %f\n%f, %f, %f\n%f, %f, %f]\n \n", camo[0][0], camo[0][1], camo[0][2],
 			camo[1][0],camo[1][1], camo[1][2],
 			camo[2][0], camo[2][1], camo[2][2]);
 		printf("cam pos:\n[%f, %f, %f, %f]\n \n", camo[3][0], camo[3][1], camo[3][2], camo[3][3]);
-		camera.mWorld.LookAt(glm::vec3(earth_pos_world[3][0] / earth_pos_world[3][3], 0,
-			earth_pos_world[3][2] / earth_pos_world[3][3]), glm::vec3(0, 1, 0));
+		camera.mWorld.LookAt(glm::vec3(node_pos_world[3][0] / node_pos_world[3][3], 0,
+			node_pos_world[3][2] / node_pos_world[3][3]), glm::vec3(0, 1, 0));
 		
 
 		//
@@ -269,6 +278,12 @@ int main()
 		//
 		// Display Dear ImGui windows
 		//
+		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(300, 100), -1.0f, 0);
+		if (opened) {
+			ImGui::SliderInt("Planet", &chosen_node, 1, 3);
+		}
+		ImGui::End();
+
 		if (show_logs)
 			Log::View::Render();
 		if (show_gui)
