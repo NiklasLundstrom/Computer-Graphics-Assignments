@@ -149,9 +149,6 @@ int main()
 	space.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
 
 
-	glm::mat4 node_pos_world;
-	int chosen_node = 2;
-
 	glViewport(0, 0, config::resolution_x, config::resolution_y);
 	glClearDepthf(1.0f);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -228,13 +225,13 @@ int main()
 		glm::mat4 node_pos_world;
 		// fix camera position near earth
 		if (chosen_node == 1) {
-			glm::mat4 node_pos_world = glm::mat4(1.0f);
+			node_pos_world = glm::mat4(1.0f);
 		}
 		else if (chosen_node == 2) {
-			glm::mat4 node_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
+			node_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*earth_axis.get_transform();
 		}
 		else {
-			glm::mat4 node_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*moon_pivot.get_transform()*moon_node.get_transform();
+			node_pos_world = earth_pivot.get_transform()*earth_center.get_transform()*moon_pivot.get_transform()*moon_node.get_transform();
 		}
 
 		printf("\033c");
@@ -248,9 +245,9 @@ int main()
 			camo[1][0],camo[1][1], camo[1][2],
 			camo[2][0], camo[2][1], camo[2][2]);
 		printf("cam pos:\n[%f, %f, %f, %f]\n \n", camo[3][0], camo[3][1], camo[3][2], camo[3][3]);
-		camera.mWorld.LookAt(glm::vec3(node_pos_world[3][0] / node_pos_world[3][3], 0,
+		/*camera.mWorld.LookAt(glm::vec3(node_pos_world[3][0] / node_pos_world[3][3], 0,
 			node_pos_world[3][2] / node_pos_world[3][3]), glm::vec3(0, 1, 0));
-		
+		*/
 
 		//
 		// Traverse the scene graph and render all nodes
