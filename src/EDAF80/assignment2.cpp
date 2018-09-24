@@ -194,6 +194,10 @@ edaf80::Assignment2::run()
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
+		glm::vec3 p0 = glm::vec3(1, 0, 0);
+		glm::vec3 p1 = glm::vec3(0, 1, 0);
+		float x = 0.3f;
+		glm::vec3 res = interpolation::evalLERP(p0, p1, x);
 
 
 		int framebuffer_width, framebuffer_height;
