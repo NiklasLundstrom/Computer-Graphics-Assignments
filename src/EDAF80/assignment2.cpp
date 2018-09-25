@@ -57,8 +57,10 @@ void
 edaf80::Assignment2::run()
 {
 	// Load the sphere geometry
-	/*auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);*/
-	auto const shape = parametric_shapes::createSphere(5, 40, 1);
+	//auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
+	//auto const shape = parametric_shapes::createSphere(5, 40, 1);
+	auto const shape = parametric_shapes::createTorus(5, 40, 1, 0.2);
+
 	if (shape.vao == 0u)
 		return;
 
@@ -194,7 +196,7 @@ edaf80::Assignment2::run()
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
-		glm::vec3 p_1 = glm::vec3(-1, 1, 0);
+		/*glm::vec3 p_1 = glm::vec3(-1, 1, 0);
 		glm::vec3 p0 = glm::vec3(0, 0, 0);
 		glm::vec3 p1 = glm::vec3(1, 1, 0);
 		glm::vec3 p2 = glm::vec3(2, -1, 0);
@@ -207,7 +209,7 @@ edaf80::Assignment2::run()
 		glm::vec3 res2 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0.5);
 		printf("(%f, %f, %f)\n", res2[0], res2[1], res2[2]);
 		glm::vec3 res3 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0.75);
-		printf("(%f, %f, %f)\n", res3[0], res3[1], res3[2]);
+		printf("(%f, %f, %f)\n", res3[0], res3[1], res3[2]);*/
 	
 
 
