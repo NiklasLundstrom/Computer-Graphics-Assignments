@@ -244,10 +244,9 @@ int main()
 			camo[1][0],camo[1][1], camo[1][2],
 			camo[2][0], camo[2][1], camo[2][2]);
 		printf("cam pos:\n[%f, %f, %f, %f]\n \n", camo[3][0], camo[3][1], camo[3][2], camo[3][3]);
+
 	/*	camera.mWorld.LookAt(glm::vec3(node_pos_world[3][0] / node_pos_world[3][3], 0,
 			node_pos_world[3][2] / node_pos_world[3][3]), glm::vec3(0, 1, 0));*/
-
-
 
 
 		//
