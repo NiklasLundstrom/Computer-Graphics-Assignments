@@ -124,10 +124,10 @@ edaf80::Assignment2::run()
 
 	glEnable(GL_DEPTH_TEST);
 
-	// Enable face culling to improve performance
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
-	//glCullFace(GL_BACK);
+	//Enable face culling to improve performance
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glCullFace(GL_BACK);
 
 
 	f64 ddeltatime;
@@ -194,7 +194,10 @@ edaf80::Assignment2::run()
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
-
+		glm::vec3 p0 = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 p1 = glm::vec3(0.0f, 1.0f, 0.0f);
+		float x = 0.3f;
+		glm::vec3 res = interpolation::evalLERP(p0, p1, x);
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
