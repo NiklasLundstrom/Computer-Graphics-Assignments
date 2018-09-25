@@ -194,10 +194,21 @@ edaf80::Assignment2::run()
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
-		glm::vec3 p0 = glm::vec3(1, 0, 0);
-		glm::vec3 p1 = glm::vec3(0, 1, 0);
+		glm::vec3 p_1 = glm::vec3(-1, 1, 0);
+		glm::vec3 p0 = glm::vec3(0, 0, 0);
+		glm::vec3 p1 = glm::vec3(1, 1, 0);
+		glm::vec3 p2 = glm::vec3(2, -1, 0);
 		float x = 0.3f;
-		glm::vec3 res = interpolation::evalLERP(p0, p1, x);
+		float t = 1.0f;
+		glm::vec3 res = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0);
+		printf("(%f, %f, %f)\n",res[0], res[1], res[2]);
+		glm::vec3 res1 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 1);
+		printf("(%f, %f, %f)\n", res1[0], res1[1], res1[2]);
+		glm::vec3 res2 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0.5);
+		printf("(%f, %f, %f)\n", res2[0], res2[1], res2[2]);
+		glm::vec3 res3 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0.75);
+		printf("(%f, %f, %f)\n", res3[0], res3[1], res3[2]);
+	
 
 
 		int framebuffer_width, framebuffer_height;
