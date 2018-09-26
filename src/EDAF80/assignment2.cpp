@@ -123,7 +123,7 @@ edaf80::Assignment2::run()
 
 	glEnable(GL_DEPTH_TEST);
 
-	//Enable face culling to improve performance
+	// Enable face culling to improve performance
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glCullFace(GL_BACK);
@@ -166,13 +166,13 @@ edaf80::Assignment2::run()
 	points[9] = p9;
 	points[10] = p10;
 
-	int index_prev = points.size() - 1;
+	int nbrP = points.size();
+	int index_prev = nbrP - 1;
 	int index_current = 0;
 	int index_next = index_current + 1;
 	int index_next_next = index_next + 1;
 
 	//Create toruses
-	int nbrP = points.size();
 	std::vector<Node> toruses = std::vector<Node>(nbrP);
 	for (int i = 0; i < nbrP; i++) {
 		toruses[i] = Node();
@@ -186,6 +186,7 @@ edaf80::Assignment2::run()
 	ball.set_geometry(sphere);
 	ball.set_program(&fallback_shader, set_uniforms);
 	ball.set_translation(points[0]);
+
 
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
@@ -252,11 +253,25 @@ edaf80::Assignment2::run()
 
 
 
-		//! \todo Interpolate the movement of a shape between various
-		//!        control points
-
-		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		// Interpolate the movement of a shape between various
 		x += dx;
+		if (x >= 1) {
+			x = 0;
+			// linear interpolation
+			if (use_linear) {
+				index_current = (points.size() + index_current + 1) % points.size();
+				index_next = (points.size() + index_current + 1) % points.size();
+
+			}
+			// cubic interpolation
+			else {
+				index_current = (points.size() + index_current + 1) % points.size();
+				index_prev = (points.size() + index_current - 1) % points.size();
+				index_next = (points.size() + index_current + 1) % points.size();
+				index_next_next = (points.size() + index_next + 1) % points.size();
+			}
+		}
+
 		glm::vec3 res;
 		if (use_linear) {
 			res = interpolation::evalLERP(points[index_current], points[index_next], x);
@@ -267,14 +282,6 @@ edaf80::Assignment2::run()
 		}
 		ball.set_translation(res);
 
-		if (x >= 1) {
-			x = 0;
-			index_current = (points.size() + index_current + 1) % points.size();
-			index_prev =  (points.size() + index_current - 1) % points.size();
-			index_next = (points.size() + index_current + 1) % points.size();
-			index_next_next = (points.size() + index_next + 1) % points.size();
-		}
-		
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
