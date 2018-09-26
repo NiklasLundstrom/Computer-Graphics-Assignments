@@ -58,8 +58,8 @@ edaf80::Assignment2::run()
 {
 	// Load the sphere geometry
 	//auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
-	auto const sphere = parametric_shapes::createSphere(5, 40, 1);
-	auto const torus = parametric_shapes::createTorus(40, 40, 1, 0.2);
+	auto const sphere = parametric_shapes::createSphere(40, 40, 0.25);
+	auto const torus = parametric_shapes::createTorus(40, 40, 1, 0.1);
 
 	if (torus.vao == 0u || sphere.vao == 0u)
 		return;
@@ -138,43 +138,54 @@ edaf80::Assignment2::run()
 	bool show_gui = true;
 	
 	float x = 0.0f;
-	float dx = 0.1f;
+	float dx = 0.01f;
 
 	// create key points
-	glm::vec3 p0 = glm::vec3(-1, 1, 0);
-	glm::vec3 p1 = glm::vec3(0, 0, 0);
-	glm::vec3 p2 = glm::vec3(1, 1, 0);
-	glm::vec3 p3 = glm::vec3(2, -1, 0);
-	glm::vec3 p4 = glm::vec3(-1, -3, 0);
+	glm::vec3 p0 = glm::vec3(-2, 2, 0);
+	glm::vec3 p1 = glm::vec3(0, 0, 4);
+	glm::vec3 p2 = glm::vec3(4, 4, 0);
+	glm::vec3 p3 = glm::vec3(4, -2, -2);
+	glm::vec3 p4 = glm::vec3(-2, -6, 0);
+	glm::vec3 p5 = glm::vec3(-6, -4, -2);
+	glm::vec3 p6 = glm::vec3(-9, -3, -5);
+	glm::vec3 p7 = glm::vec3(-11, -3, -9);
+	glm::vec3 p8 = glm::vec3(-9, -3, -15);
+	glm::vec3 p9 = glm::vec3(-4, 0, -8);
+	glm::vec3 p10 = glm::vec3(-3, 3, 2);
 
-	std::vector<glm::vec3> points = std::vector<glm::vec3>(5);
+	std::vector<glm::vec3> points = std::vector<glm::vec3>(11);
 	points[0] = p0;
 	points[1] = p1;
 	points[2] = p2;
 	points[3] = p3;
 	points[4] = p4;
+	points[5] = p5;
+	points[6] = p6;
+	points[7] = p7;
+	points[8] = p8;
+	points[9] = p9;
+	points[10] = p10;
 
-	int index_current_prev = points.size() - 1;
+	int index_prev = points.size() - 1;
 	int index_current = 0;
-	int index_current_next = index_current + 1;
-	int index_current_next_next = index_current_next + 1;
+	int index_next = index_current + 1;
+	int index_next_next = index_next + 1;
 
 	//Create toruses
-	std::list<Node*> toruses = std::list<Node*>();
 	int nbrP = points.size();
-		for (int i = 0; i < nbrP; i++) {
-		Node *n = new Node();
-		toruses.push_back(n);
-		n->set_geometry(torus);
-		n->set_program(&fallback_shader, set_uniforms);
-		n->set_translation(points[i]);
+	std::vector<Node> toruses = std::vector<Node>(nbrP);
+	for (int i = 0; i < nbrP; i++) {
+		toruses[i] = Node();
+		toruses[i].set_geometry(torus);
+		toruses[i].set_program(&fallback_shader, set_uniforms);
+		toruses[i].set_translation(points[i]);
 	}
 
 	// Create ball
 	Node ball = Node();
 	ball.set_geometry(sphere);
 	ball.set_program(&fallback_shader, set_uniforms);
-	// TODO TRS
+	ball.set_translation(points[0]);
 
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
@@ -199,28 +210,28 @@ edaf80::Assignment2::run()
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
-		
+
 		if (inputHandler.GetKeycodeState(GLFW_KEY_1) & JUST_PRESSED) {
-			for each  (Node* n in toruses){
-				n->set_program(&fallback_shader, set_uniforms);
+			for (int i = 0; i < nbrP; i++) {
+				toruses[i].set_program(&fallback_shader, set_uniforms);
 			}
 			ball.set_program(&fallback_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_2) & JUST_PRESSED) {
-			for each  (Node* n in toruses) {
-				n->set_program(&diffuse_shader, set_uniforms);
+			for (int i = 0; i < nbrP; i++) {
+				toruses[i].set_program(&diffuse_shader, set_uniforms);
 			}
 			ball.set_program(&diffuse_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_3) & JUST_PRESSED) {
-			for each  (Node* n in toruses) {
-				n->set_program(&normal_shader, set_uniforms);
+			for (int i = 0; i < nbrP; i++) {
+				toruses[i].set_program(&normal_shader, set_uniforms);
 			}
 			ball.set_program(&normal_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_4) & JUST_PRESSED) {
-			for each  (Node* n in toruses) {
-				n->set_program(&texcoord_shader, set_uniforms);
+			for (int i = 0; i < nbrP; i++) {
+				toruses[i].set_program(&texcoord_shader, set_uniforms);
 			}
 			ball.set_program(&texcoord_shader, set_uniforms);
 		}
@@ -239,34 +250,31 @@ edaf80::Assignment2::run()
 			break;
 		}
 
-		
+
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
-		
-		system("PAUSE");
+
+		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		x += dx;
+		glm::vec3 res;
+		if (use_linear) {
+			res = interpolation::evalLERP(points[index_current], points[index_next], x);
+		}
+		else {
+			res = interpolation::evalCatmullRom(points[index_prev], points[index_current],
+			points[index_next], points[index_next_next], catmull_rom_tension, x);
+		}
+		ball.set_translation(res);
+
 		if (x >= 1) {
 			x = 0;
 			index_current = (points.size() + index_current + 1) % points.size();
-			index_current_prev =  (points.size() + index_current - 1) % points.size();
-			index_current_next = (points.size() + index_current + 1) % points.size();
-			index_current_next_next = (points.size() + index_current_next + 1) % points.size();
+			index_prev =  (points.size() + index_current - 1) % points.size();
+			index_next = (points.size() + index_current + 1) % points.size();
+			index_next_next = (points.size() + index_next + 1) % points.size();
 		}
 		
-		glm::vec3 res = interpolation::evalCatmullRom(points[index_current_prev], points[index_current],
-			points[index_current_next], points[index_current_next_next], catmull_rom_tension, x);
-
-		/*glm::vec3 res = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0);
-		printf("(%f, %f, %f)\n",res[0], res[1], res[2]);
-		glm::vec3 res1 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 1);
-		printf("(%f, %f, %f)\n", res1[0], res1[1], res1[2]);
-		glm::vec3 res2 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0.5);
-		printf("(%f, %f, %f)\n", res2[0], res2[1], res2[2]);
-		glm::vec3 res3 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0.75);
-		printf("(%f, %f, %f)\n", res3[0], res3[1], res3[2]);*/
-	
-
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
@@ -276,9 +284,25 @@ edaf80::Assignment2::run()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		// render
-		for each  (Node* n in toruses) {
-			n->render(mCamera.GetWorldToClipMatrix(), n->get_transform());
+		for (int i = 0; i < toruses.size(); i++){
+
+			glm::mat4 prevM = toruses[(nbrP + i - 1) % nbrP].get_transform();
+			glm::vec3 prevT = glm::vec3(prevM[3][0], prevM[3][1], prevM[3][2]);
+			glm::mat4 nextM = toruses[(nbrP + i + 1) % nbrP].get_transform();
+			auto nextT = glm::vec3(nextM[3][0], nextM[3][1], nextM[3][2]);
+			auto f = glm::normalize(nextT - prevT);
+			auto l = glm::cross(glm::vec3(0, 1, 0),f);
+			auto u = glm::cross(f, l);
+			auto R = glm::mat4(l[0], u[0], f[0], 0,
+								l[1], u[1], f[1], 0,
+								l[2], u[2], f[2], 0,
+								0, 0, 0, 1);
+
+
+
+			toruses[i].render(mCamera.GetWorldToClipMatrix(), toruses[i].get_transform() * R);
 		}
+
 		ball.render(mCamera.GetWorldToClipMatrix(), ball.get_transform());
 
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(300, 100), -1.0f, 0);
