@@ -140,6 +140,28 @@ edaf80::Assignment2::run()
 	bool show_logs = true;
 	bool show_gui = true;
 
+	
+	float x = 0.0f;
+	float dx = 0.1f;
+
+	glm::vec3 p0 = glm::vec3(-1, 1, 0);
+	glm::vec3 p1 = glm::vec3(0, 0, 0);
+	glm::vec3 p2 = glm::vec3(1, 1, 0);
+	glm::vec3 p3 = glm::vec3(2, -1, 0);
+	glm::vec3 p4 = glm::vec3(-1, -3, 0);
+
+	std::vector<glm::vec3> points = std::vector<glm::vec3>(5);
+	points[0] = p0;
+	points[1] = p1;
+	points[2] = p2;
+	points[3] = p3;
+	points[4] = p4;
+
+	int index_current_prev = points.size() - 1;
+	int index_current = 0;
+	int index_current_next = index_current + 1;
+	int index_current_next_next = index_current_next + 1;
+
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
 		ddeltatime = nowTime - lastTime;
@@ -180,15 +202,15 @@ edaf80::Assignment2::run()
 			polygon_mode = get_next_mode(polygon_mode);
 		}
 		switch (polygon_mode) {
-			case polygon_mode_t::fill:
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				break;
-			case polygon_mode_t::line:
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				break;
-			case polygon_mode_t::point:
-				glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-				break;
+		case polygon_mode_t::fill:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			break;
+		case polygon_mode_t::line:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			break;
+		case polygon_mode_t::point:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+			break;
 		}
 
 		circle_rings.rotate_y(0.01f);
@@ -196,19 +218,27 @@ edaf80::Assignment2::run()
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
-		/*glm::vec3 p_1 = glm::vec3(-1, 1, 0);
-		glm::vec3 p0 = glm::vec3(0, 0, 0);
-		glm::vec3 p1 = glm::vec3(1, 1, 0);
-		glm::vec3 p2 = glm::vec3(2, -1, 0);
-		float x = 0.3f;
-		float t = 1.0f;
-		glm::vec3 res = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0);
+		
+		system("PAUSE");
+		x += dx;
+		if (x >= 1) {
+			x = 0;
+			index_current = (points.size() + index_current + 1) % points.size();
+			index_current_prev =  (points.size() + index_current - 1) % points.size();
+			index_current_next = (points.size() + index_current + 1) % points.size();
+			index_current_next_next = (points.size() + index_current_next + 1) % points.size();
+		}
+		
+		glm::vec3 res = interpolation::evalCatmullRom(points[index_current_prev], points[index_current],
+			points[index_current_next], points[index_current_next_next], catmull_rom_tension, x);
+
+		/*glm::vec3 res = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0);
 		printf("(%f, %f, %f)\n",res[0], res[1], res[2]);
-		glm::vec3 res1 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 1);
+		glm::vec3 res1 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 1);
 		printf("(%f, %f, %f)\n", res1[0], res1[1], res1[2]);
-		glm::vec3 res2 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0.5);
+		glm::vec3 res2 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0.5);
 		printf("(%f, %f, %f)\n", res2[0], res2[1], res2[2]);
-		glm::vec3 res3 = interpolation::evalCatmullRom(p_1, p0, p1, p2, t, 0.75);
+		glm::vec3 res3 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0.75);
 		printf("(%f, %f, %f)\n", res3[0], res3[1], res3[2]);*/
 	
 
