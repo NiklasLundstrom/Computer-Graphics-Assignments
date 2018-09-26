@@ -58,10 +58,10 @@ edaf80::Assignment2::run()
 {
 	// Load the sphere geometry
 	//auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
-	//auto const shape = parametric_shapes::createSphere(5, 40, 1);
-	auto const shape = parametric_shapes::createTorus(5, 40, 1, 0.2);
+	auto const sphere = parametric_shapes::createSphere(5, 40, 1);
+	auto const torus = parametric_shapes::createTorus(40, 40, 1, 0.2);
 
-	if (shape.vao == 0u)
+	if (torus.vao == 0u || sphere.vao == 0u)
 		return;
 
 	// Set up the camera
@@ -114,13 +114,10 @@ edaf80::Assignment2::run()
 	// it can always be changed at runtime through the "Scene Controls" window.
 	bool use_linear = true;
 
-	auto circle_rings = Node();
+	/*auto circle_rings = Node();
 	circle_rings.set_geometry(shape);
 	circle_rings.set_program(&fallback_shader, set_uniforms);
-
-
-	//! \todo Create a tesselated sphere and a tesselated torus
-
+	*/
 
 	auto polygon_mode = polygon_mode_t::fill;
 
@@ -139,11 +136,11 @@ edaf80::Assignment2::run()
 
 	bool show_logs = true;
 	bool show_gui = true;
-
 	
 	float x = 0.0f;
 	float dx = 0.1f;
 
+	// create key points
 	glm::vec3 p0 = glm::vec3(-1, 1, 0);
 	glm::vec3 p1 = glm::vec3(0, 0, 0);
 	glm::vec3 p2 = glm::vec3(1, 1, 0);
@@ -161,6 +158,23 @@ edaf80::Assignment2::run()
 	int index_current = 0;
 	int index_current_next = index_current + 1;
 	int index_current_next_next = index_current_next + 1;
+
+	//Create toruses
+	std::list<Node*> toruses = std::list<Node*>();
+	int nbrP = points.size();
+		for (int i = 0; i < nbrP; i++) {
+		Node *n = new Node();
+		toruses.push_back(n);
+		n->set_geometry(torus);
+		n->set_program(&fallback_shader, set_uniforms);
+		n->set_translation(points[i]);
+	}
+
+	// Create ball
+	Node ball = Node();
+	ball.set_geometry(sphere);
+	ball.set_program(&fallback_shader, set_uniforms);
+	// TODO TRS
 
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
@@ -185,18 +199,30 @@ edaf80::Assignment2::run()
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
-
+		
 		if (inputHandler.GetKeycodeState(GLFW_KEY_1) & JUST_PRESSED) {
-			circle_rings.set_program(&fallback_shader, set_uniforms);
+			for each  (Node* n in toruses){
+				n->set_program(&fallback_shader, set_uniforms);
+			}
+			ball.set_program(&fallback_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_2) & JUST_PRESSED) {
-			circle_rings.set_program(&diffuse_shader, set_uniforms);
+			for each  (Node* n in toruses) {
+				n->set_program(&diffuse_shader, set_uniforms);
+			}
+			ball.set_program(&diffuse_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_3) & JUST_PRESSED) {
-			circle_rings.set_program(&normal_shader, set_uniforms);
+			for each  (Node* n in toruses) {
+				n->set_program(&normal_shader, set_uniforms);
+			}
+			ball.set_program(&normal_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_4) & JUST_PRESSED) {
-			circle_rings.set_program(&texcoord_shader, set_uniforms);
+			for each  (Node* n in toruses) {
+				n->set_program(&texcoord_shader, set_uniforms);
+			}
+			ball.set_program(&texcoord_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
 			polygon_mode = get_next_mode(polygon_mode);
@@ -213,8 +239,7 @@ edaf80::Assignment2::run()
 			break;
 		}
 
-		circle_rings.rotate_y(0.01f);
-
+		
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
@@ -250,7 +275,11 @@ edaf80::Assignment2::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		circle_rings.render(mCamera.GetWorldToClipMatrix(), circle_rings.get_transform());
+		// render
+		for each  (Node* n in toruses) {
+			n->render(mCamera.GetWorldToClipMatrix(), n->get_transform());
+		}
+		ball.render(mCamera.GetWorldToClipMatrix(), ball.get_transform());
 
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
