@@ -254,7 +254,7 @@ edaf80::Assignment2::run()
 				points[index_next], points[index_next_next], catmull_rom_tension, x);
 			ball.set_translation(res);
 		}
-		
+
 
 		x += dx;
 		if (x >= 1) {
@@ -286,6 +286,7 @@ edaf80::Assignment2::run()
 
 		// render
 		for each  (Node* n in toruses) {
+
 			n->render(mCamera.GetWorldToClipMatrix(), n->get_transform());
 		}
 		ball.render(mCamera.GetWorldToClipMatrix(), ball.get_transform());
