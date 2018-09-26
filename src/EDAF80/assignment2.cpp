@@ -123,7 +123,7 @@ edaf80::Assignment2::run()
 
 	glEnable(GL_DEPTH_TEST);
 
-	//Enable face culling to improve performance
+	// Enable face culling to improve performance
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glCullFace(GL_BACK);
@@ -154,10 +154,11 @@ edaf80::Assignment2::run()
 	points[3] = p3;
 	points[4] = p4;
 
-	int index_current_prev = points.size() - 1;
+	// interpolation
+	int index_prev = points.size() - 1;
 	int index_current = 0;
-	int index_current_next = index_current + 1;
-	int index_current_next_next = index_current_next + 1;
+	int index_next = index_current + 1;
+	int index_next_next = index_next + 1;
 
 	//Create toruses
 	std::list<Node*> toruses = std::list<Node*>();
@@ -174,6 +175,7 @@ edaf80::Assignment2::run()
 	Node ball = Node();
 	ball.set_geometry(sphere);
 	ball.set_program(&fallback_shader, set_uniforms);
+	ball.set_translation(points[0]);
 	// TODO TRS
 
 	while (!glfwWindowShouldClose(window)) {
@@ -243,30 +245,37 @@ edaf80::Assignment2::run()
 
 		//! \todo Interpolate the movement of a shape between various
 		//!        control points
+		if (use_linear) {
+			glm::vec3 res = interpolation::evalLERP(points[index_current], points[index_next], x);
+			ball.set_translation(res);
+		}
+		else {
+			glm::vec3 res = interpolation::evalCatmullRom(points[index_prev], points[index_current],
+				points[index_next], points[index_next_next], catmull_rom_tension, x);
+			ball.set_translation(res);
+		}
 		
-		system("PAUSE");
+
 		x += dx;
 		if (x >= 1) {
 			x = 0;
-			index_current = (points.size() + index_current + 1) % points.size();
-			index_current_prev =  (points.size() + index_current - 1) % points.size();
-			index_current_next = (points.size() + index_current + 1) % points.size();
-			index_current_next_next = (points.size() + index_current_next + 1) % points.size();
-		}
+			// quadratic interpolation
+			if (use_linear) {
+				index_current = (points.size() + index_current + 1) % points.size();
+				index_next = (points.size() + index_current + 1) % points.size();
 		
-		glm::vec3 res = interpolation::evalCatmullRom(points[index_current_prev], points[index_current],
-			points[index_current_next], points[index_current_next_next], catmull_rom_tension, x);
+			}
+			// linear interpolation
+			else {
+				index_current = (points.size() + index_current + 1) % points.size();
+				index_prev = (points.size() + index_current - 1) % points.size();
+				index_next = (points.size() + index_current + 1) % points.size();
+				index_next_next = (points.size() + index_next + 1) % points.size();
+			}
+		}
 
-		/*glm::vec3 res = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0);
-		printf("(%f, %f, %f)\n",res[0], res[1], res[2]);
-		glm::vec3 res1 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 1);
-		printf("(%f, %f, %f)\n", res1[0], res1[1], res1[2]);
-		glm::vec3 res2 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0.5);
-		printf("(%f, %f, %f)\n", res2[0], res2[1], res2[2]);
-		glm::vec3 res3 = interpolation::evalCatmullRom(p_1, p0, p1, p2, catmull_rom_tension, 0.75);
-		printf("(%f, %f, %f)\n", res3[0], res3[1], res3[2]);*/
 	
-
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
