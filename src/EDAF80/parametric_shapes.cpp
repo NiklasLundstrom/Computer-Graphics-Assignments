@@ -200,7 +200,7 @@ parametric_shapes::createSphere(unsigned int const res_theta,
 				0.0f);
 
 			// tangent
-			auto t = glm::vec3(radius * cos_theta, 0.0f, radius * sin_theta);
+			auto t = glm::vec3(radius * cos_theta, 0.0f, -radius * sin_theta);
 			t = glm::normalize(t);
 			tangents[index] = t;
 
@@ -378,13 +378,13 @@ parametric_shapes::createTorus(unsigned int const res_theta,
 		for (unsigned int j = 0u; j < res_theta - 1u; ++j)
 		{
 			indices[index] = glm::uvec3(res_theta* i + j,
-				res_theta * i + j + 1u + res_theta,
-				res_theta * i + j + 1u);
+				res_theta * i + j + 1u ,
+				res_theta * i + j + 1u+ res_theta);
 			++index;
 
 			indices[index] = glm::uvec3(res_theta * i + j,
-				res_theta * i + j + res_theta,
-				res_theta* i + j + res_theta + 1u);
+				res_theta * i + j + res_theta + 1u,
+				res_theta* i + j + res_theta);
 			++index;
 		}
 	}

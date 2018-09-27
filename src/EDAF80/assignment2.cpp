@@ -125,7 +125,7 @@ edaf80::Assignment2::run()
 
 	// Enable face culling to improve performance
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
+	//glCullFace(GL_FRONT);
 	glCullFace(GL_BACK);
 
 
@@ -280,7 +280,7 @@ edaf80::Assignment2::run()
 			res = interpolation::evalCatmullRom(points[index_prev], points[index_current],
 			points[index_next], points[index_next_next], catmull_rom_tension, x);
 		}
-		ball.set_translation(res);
+		//ball.set_translation(res);
 
 
 		int framebuffer_width, framebuffer_height;
