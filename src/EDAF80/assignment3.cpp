@@ -211,6 +211,8 @@ edaf80::Assignment3::run()
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+		circle_ring.render(mCamera.GetWorldToClipMatrix(), circle_ring.get_transform());
+
 		bool opened = ImGui::Begin("Scene Control", &opened, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
 			ImGui::ColorEdit3("Ambient", glm::value_ptr(ambient));
