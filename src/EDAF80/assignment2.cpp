@@ -88,8 +88,8 @@ edaf80::Assignment2::run()
 		LogError("Failed to load diffuse shader");
 
 	GLuint normal_shader = 0u;
-	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/binormal.vert" },
-	                                           { ShaderType::fragment, "EDAF80/binormal.frag" } },
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/normal.vert" },
+	                                           { ShaderType::fragment, "EDAF80/normal.frag" } },
 	                                         normal_shader);
 	if (normal_shader == 0u)
 		LogError("Failed to load normal shader");
