@@ -58,8 +58,10 @@ void
 edaf80::Assignment3::run()
 {
 	// Load the sphere geometry
-	auto circle_ring_shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
-	if (circle_ring_shape.vao == 0u) {
+	//auto teapot = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
+	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("utah-teapot.obj");
+	bonobo::mesh_data const& teapot_shape = objects.front();
+	if (teapot_shape.vao == 0u) {
 		LogError("Failed to retrieve the circle ring mesh");
 		return;
 	}
@@ -122,9 +124,9 @@ edaf80::Assignment3::run()
 
 	auto polygon_mode = polygon_mode_t::fill;
 
-	auto circle_ring = Node();
-	circle_ring.set_geometry(circle_ring_shape);
-	circle_ring.set_program(&fallback_shader, set_uniforms);
+	auto teapot = Node();
+	teapot.set_geometry(teapot_shape);
+	teapot.set_program(&fallback_shader, set_uniforms);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -162,16 +164,16 @@ edaf80::Assignment3::run()
 		ImGui_ImplGlfwGL3_NewFrame();
 
 		if (inputHandler.GetKeycodeState(GLFW_KEY_1) & JUST_PRESSED) {
-			circle_ring.set_program(&fallback_shader, set_uniforms);
+			teapot.set_program(&fallback_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_2) & JUST_PRESSED) {
-			circle_ring.set_program(&diffuse_shader, set_uniforms);
+			teapot.set_program(&diffuse_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_3) & JUST_PRESSED) {
-			circle_ring.set_program(&normal_shader, set_uniforms);
+			teapot.set_program(&normal_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_4) & JUST_PRESSED) {
-			circle_ring.set_program(&texcoord_shader, set_uniforms);
+			teapot.set_program(&texcoord_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
 			polygon_mode = get_next_mode(polygon_mode);
@@ -211,7 +213,7 @@ edaf80::Assignment3::run()
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		circle_ring.render(mCamera.GetWorldToClipMatrix(), circle_ring.get_transform());
+		teapot.render(mCamera.GetWorldToClipMatrix(), teapot.get_transform());
 
 		bool opened = ImGui::Begin("Scene Control", &opened, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
