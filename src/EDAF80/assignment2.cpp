@@ -101,6 +101,8 @@ edaf80::Assignment2::run()
 	if (texcoord_shader == 0u)
 		LogError("Failed to load texcoord shader");
 
+
+
 	auto const light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
