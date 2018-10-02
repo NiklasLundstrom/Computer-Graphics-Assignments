@@ -103,12 +103,12 @@ edaf80::Assignment3::run()
 	if (texcoord_shader == 0u)
 		LogError("Failed to load texcoord shader");
 
-	GLuint flat_shader = 0u;
-	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/flat.vert" },
-												{ ShaderType::fragment, "EDAF80/flat.frag" }  },
-												flat_shader);
-	if (flat_shader == 0u)
-		LogError("Failed to load flat shader");
+	GLuint phong_shader = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong.vert" },
+												{ ShaderType::fragment, "EDAF80/phong.frag" }  },
+												phong_shader);
+	if (phong_shader == 0u)
+		LogError("Failed to load phong shader");
 
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){
@@ -183,7 +183,7 @@ edaf80::Assignment3::run()
 			teapot.set_program(&texcoord_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_5) & JUST_PRESSED) {
-			teapot.set_program(&flat_shader, set_uniforms);
+			teapot.set_program(&phong_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
 			polygon_mode = get_next_mode(polygon_mode);
