@@ -133,6 +133,7 @@ edaf80::Assignment3::run()
 	}
 
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
+
 	auto const set_uniforms = [&light_position](GLuint program){
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 	};

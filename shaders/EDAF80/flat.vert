@@ -11,7 +11,6 @@ out VS_OUT {
 
 void main()
 {
-vs_out.vertex = vertex;
-
-gl_Position = vertex_world_to_clip * vertex_model_to_world * vec4(vertex, 1.0);
+	vs_out.vertex = vertex;
+	gl_Position = vertex_world_to_clip * vertex_model_to_world * vec4(vertex,1.0);
 }
