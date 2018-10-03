@@ -27,7 +27,7 @@ void main()
   vs_out.texcoord = vec2(texcoord.x, texcoord.y);
   vec3 worldVertex = (vertex_model_to_world*vec4(vertex,1.0)).xyz;
 
-  vs_out.normal = normal;
+  vs_out.normal = normal; 
   vs_out.tangent = tangent;
   vs_out.binormal = binormal;
   vs_out.V = camera_position - worldVertex;
