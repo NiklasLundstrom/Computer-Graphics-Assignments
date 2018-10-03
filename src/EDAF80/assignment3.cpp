@@ -105,12 +105,35 @@ edaf80::Assignment3::run()
 
 	GLuint phong_shader = 0u;
 	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong.vert" },
-												{ ShaderType::fragment, "EDAF80/phong.frag" }  },
-												phong_shader);
-	if (phong_shader == 0u)
+											   { ShaderType::fragment, "EDAF80/phong.frag" } },
+											phong_shader);
+	if (phong_shader == 0u) {
 		LogError("Failed to load phong shader");
+	}
+	GLuint phong_shader_w_texture = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong_w_texture.vert" },
+											   { ShaderType::fragment, "EDAF80/phong_w_texture.frag" } },
+		phong_shader_w_texture);
+	if (phong_shader_w_texture == 0u) {
+		LogError("Failed to load phong shader with texture");
+	}
+	GLuint cubemapping = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/cubemapping.vert" },
+											   { ShaderType::fragment, "EDAF80/cubemapping.frag" } },
+		cubemapping);
+	if (cubemapping == 0u) {
+		LogError("Failed to load cube mapping");
+	}
+	GLuint normal_mapping = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/normal_mapping.vert" },
+											   { ShaderType::fragment, "EDAF80/normal_mapping.frag" } },
+		normal_mapping);
+	if (normal_mapping == 0u) {
+		LogError("Failed to load normal mapping");
+	}
 
-	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
+	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
+
 	auto const set_uniforms = [&light_position](GLuint program){
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 	};
@@ -134,6 +157,21 @@ edaf80::Assignment3::run()
 	auto teapot = Node();
 	teapot.set_geometry(teapot_shape);
 	teapot.set_program(&fallback_shader, set_uniforms);
+
+	// texture
+	GLuint const space_texture = bonobo::loadTexture2D("fieldstone_diffuse.png");
+	teapot.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
+
+	// normal mapping
+	GLuint const normal_texture = bonobo::loadTexture2D("fieldstone_bump.png");
+	teapot.add_texture("normal_texture", normal_texture, GL_TEXTURE_2D);
+
+	// cubemapping
+	auto my_cube_map_id = bonobo::loadTextureCubeMap("opensea/posx.png", "sunset_sky/negx.png",
+		"sunset_sky/posy.png", "sunset_sky/negy.png",
+		"sunset_sky/posz.png", "sunset_sky/negz.png", true);
+
+	teapot.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -183,7 +221,16 @@ edaf80::Assignment3::run()
 			teapot.set_program(&texcoord_shader, set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_5) & JUST_PRESSED) {
-			teapot.set_program(&phong_shader, set_uniforms);
+			teapot.set_program(&phong_shader, phong_set_uniforms);
+		}
+		if (inputHandler.GetKeycodeState(GLFW_KEY_6) & JUST_PRESSED) {
+			teapot.set_program(&phong_shader_w_texture, phong_set_uniforms);
+		}
+		if (inputHandler.GetKeycodeState(GLFW_KEY_7) & JUST_PRESSED) {
+			teapot.set_program(&cubemapping, phong_set_uniforms);
+		}
+		if (inputHandler.GetKeycodeState(GLFW_KEY_8) & JUST_PRESSED) {
+			teapot.set_program(&normal_mapping, phong_set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
 			polygon_mode = get_next_mode(polygon_mode);
