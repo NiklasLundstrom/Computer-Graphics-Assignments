@@ -178,11 +178,11 @@ edaf80::Assignment3::run()
 	teapot.set_program(&fallback_shader, set_uniforms);
 
 	// texture
-	GLuint const space_texture = bonobo::loadTexture2D("TerrainRock_0016_Color.png");
+	GLuint const space_texture = bonobo::loadTexture2D("TerrainRock_0028_Color.png");
 	teapot.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
 
 	// normal mapping
-	GLuint const normal_texture = bonobo::loadTexture2D("TerrainRock_0016_Normal.png");
+	GLuint const normal_texture = bonobo::loadTexture2D("TerrainRock_0028_Normal.png");
 	teapot.add_texture("normal_texture", normal_texture, GL_TEXTURE_2D);
 
 	// cubemapping
@@ -192,7 +192,7 @@ edaf80::Assignment3::run()
 	teapot.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
 
 	// specular map
-	GLuint const reflect_texture = bonobo::loadTexture2D("TerrainRock_0016_Specular.png");
+	GLuint const reflect_texture = bonobo::loadTexture2D("TerrainRock_0028_Specular.png");
 	teapot.add_texture("reflect_texture", reflect_texture, GL_TEXTURE_2D);
 
 
