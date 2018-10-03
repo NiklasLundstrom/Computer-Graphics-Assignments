@@ -141,6 +141,14 @@ edaf80::Assignment3::run()
 	if (skybox == 0u) {
 		LogError("Failed to load skybox");
 	}
+	GLuint reflective = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/reflective.vert" },
+											   { ShaderType::fragment, "EDAF80/reflective.frag" } },
+		reflective);
+	if (reflective == 0u) {
+		LogError("Failed to load reflective");
+	}
+
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
 
 	auto const set_uniforms = [&light_position](GLuint program){
@@ -170,19 +178,25 @@ edaf80::Assignment3::run()
 	teapot.set_program(&fallback_shader, set_uniforms);
 
 	// texture
-	GLuint const space_texture = bonobo::loadTexture2D("fieldstone_diffuse.png");
+	GLuint const space_texture = bonobo::loadTexture2D("TerrainRock_0016_Color.png");
 	teapot.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
 
 	// normal mapping
-	GLuint const normal_texture = bonobo::loadTexture2D("fieldstone_bump.png");
+	GLuint const normal_texture = bonobo::loadTexture2D("TerrainRock_0016_Normal.png");
 	teapot.add_texture("normal_texture", normal_texture, GL_TEXTURE_2D);
 
 	// cubemapping
 	auto my_cube_map_id = bonobo::loadTextureCubeMap("sunset_sky/posx.png", "sunset_sky/negx.png",
 		"sunset_sky/posy.png", "sunset_sky/negy.png",
 		"sunset_sky/posz.png", "sunset_sky/negz.png", true);
-
 	teapot.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
+
+	// specular map
+	GLuint const reflect_texture = bonobo::loadTexture2D("TerrainRock_0016_Specular.png");
+	teapot.add_texture("reflect_texture", reflect_texture, GL_TEXTURE_2D);
+
+
+	
 
 	auto sky = Node();
 	sky.set_geometry(sphere);
@@ -249,6 +263,9 @@ edaf80::Assignment3::run()
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_8) & JUST_PRESSED) {
 			teapot.set_program(&normal_mapping, phong_set_uniforms);
+		}
+		if (inputHandler.GetKeycodeState(GLFW_KEY_9) & JUST_PRESSED) {
+			teapot.set_program(&reflective, phong_set_uniforms);
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
 			polygon_mode = get_next_mode(polygon_mode);
