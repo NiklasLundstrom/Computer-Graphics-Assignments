@@ -159,8 +159,8 @@ edaf80::Assignment3::run()
 	teapot.set_program(&fallback_shader, set_uniforms);
 
 	// texture
-	GLuint const space_texture = bonobo::loadTexture2D("fieldstone_diffuse.png");
-	teapot.add_texture("diffuse_texture", space_texture, GL_TEXTURE_2D);
+	GLuint const image_texture = bonobo::loadTexture2D("fieldstone_diffuse.png");
+	teapot.add_texture("diffuse_texture", image_texture, GL_TEXTURE_2D);
 
 	// normal mapping
 	GLuint const normal_texture = bonobo::loadTexture2D("fieldstone_bump.png");

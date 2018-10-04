@@ -321,6 +321,11 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 	             /* the type of each component */GL_UNSIGNED_BYTE,
 	             /* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
+	auto data = getTextureData("cubemaps/" + negy, width, height, false);
+	if (data.empty()) {
+		glDeleteTextures(1, &texture);
+		return 0u;
+	}
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 		/* mipmap level, you'll see that in EDAN35 */0,
 		/* how are the components internally stored */GL_RGBA,
@@ -330,7 +335,11 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 		/* the format of the pixel data: which components are available */GL_RGBA,
 		/* the type of each component */GL_UNSIGNED_BYTE,
 		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
-
+	auto data = getTextureData("cubemaps/" + negz, width, height, false);
+	if (data.empty()) {
+		glDeleteTextures(1, &texture);
+		return 0u;
+	}
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
 		/* mipmap level, you'll see that in EDAN35 */0,
 		/* how are the components internally stored */GL_RGBA,
@@ -341,6 +350,11 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 		/* the type of each component */GL_UNSIGNED_BYTE,
 		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
+	auto data = getTextureData("cubemaps/" + posx, width, height, false);
+	if (data.empty()) {
+		glDeleteTextures(1, &texture);
+		return 0u;
+	}
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,
 		/* mipmap level, you'll see that in EDAN35 */0,
 		/* how are the components internally stored */GL_RGBA,
@@ -351,6 +365,11 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 		/* the type of each component */GL_UNSIGNED_BYTE,
 		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
+	auto data = getTextureData("cubemaps/" + posy, width, height, false);
+	if (data.empty()) {
+		glDeleteTextures(1, &texture);
+		return 0u;
+	}
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
 		/* mipmap level, you'll see that in EDAN35 */0,
 		/* how are the components internally stored */GL_RGBA,
@@ -361,6 +380,11 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 		/* the type of each component */GL_UNSIGNED_BYTE,
 		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
+	auto data = getTextureData("cubemaps/" + posz, width, height, false);
+	if (data.empty()) {
+		glDeleteTextures(1, &texture);
+		return 0u;
+	}
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 		/* mipmap level, you'll see that in EDAN35 */0,
 		/* how are the components internally stored */GL_RGBA,

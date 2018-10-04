@@ -14,5 +14,5 @@ void main()
  vec3 V = normalize(fs_in.V);
  vec3 N = normalize(fs_in.normal);
  vec3 R = reflect(-V, N);
- fColor = texture(my_cube_map, R);
+ fColor = texture(my_cube_map, normalize(R));
 }
