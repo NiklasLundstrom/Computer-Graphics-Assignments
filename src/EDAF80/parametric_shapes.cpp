@@ -13,47 +13,53 @@ bonobo::mesh_data
 parametric_shapes::createQuad(unsigned int width, unsigned int height)
 {
 
-	auto const vertices_nb = 4;
+	auto const vertices_nb = width * height;
 
+	auto vertices = std::vector<glm::vec3>(vertices_nb);
+	auto indices = std::vector<glm::uvec3>(2u * (width - 1u) * (height - 1u));
 	auto normals = std::vector<glm::vec3>(vertices_nb);
 	auto texcoords = std::vector<glm::vec3>(vertices_nb);
 	auto tangents = std::vector<glm::vec3>(vertices_nb);
 	auto binormals = std::vector<glm::vec3>(vertices_nb);
 
 	//! \todo Fill in the blanks
-	auto const
-		vertices = std::array<glm::vec3, 4>{
-		glm::vec3(0.0f,                      0.0f,                       0.0f),
-		glm::vec3(static_cast<float>(width), 0.0f,                       0.0f),
-		glm::vec3(static_cast<float>(width), static_cast<float>(height), 0.0f),
-		glm::vec3(0.0f,                      static_cast<float>(height), 0.0f)
-	};
+	size_t index = 0u;
+	for (unsigned int i = 0u; i < width; i++) {
+		for (unsigned int j = 0u; j < height; j++){
+			// vertices
+			vertices[index] = glm::vec3( -1 + 2*i/( (float) width-1),
+				0,
+				 -1 + 2 * j / ((float) height - 1));
+			// tangent
+			tangents[index] = glm::vec3(1.0f, 0.0f, 0.0f);
+			// binormal
+			binormals[index] = glm::vec3(0.0f, 0.0f, 1.0f);
+			// normals
+			normals[index] = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	auto const indices = std::array<glm::uvec3, 2>{
-		glm::uvec3(0u, 1u, 2u),
-		glm::uvec3(0u, 2u, 3u)
-	};
+			index++;
+		}
+	}
+	// indices
+	index = 0u;
+	for (int i = 0; i < width - 1; i++){
+		for (int j = 0; j < height - 1; j++){
+			indices[index] = glm::uvec3(j + i*height,
+										j + (i+1u)*height,
+										j + (i + 1u)*height + 1u);
 
-	// tangent
-	auto t = glm::vec3(1.0f, 0.0f, 0.0f);
-	tangents[0] = t;
-	tangents[1] = t;
-	tangents[2] = t;
-	tangents[3] = t;
+			indices[index + 1] = glm::uvec3(j + i*height,
+											j + (i + 1u)*height + 1u,
+											j  + i*height + 1u);
+			index += 2;
 
-	// binormal
-	auto b = glm::vec3(0.0f, 1.0f, 0.0f);
-	binormals[0] = b;
-	binormals[1] = b;
-	binormals[2] = b;
-	binormals[3] = b;
+		}
+	}
 
-	// normal
-	auto const n = glm::cross(t, b);
-	normals[0] = n;
-	normals[1] = n;
-	normals[2] = n;
-	normals[3] = n;
+	
+
+	
+	
 
 
 	bonobo::mesh_data data;

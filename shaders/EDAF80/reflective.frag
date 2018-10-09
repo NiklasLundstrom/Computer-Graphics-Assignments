@@ -35,8 +35,8 @@ void main()
  vec3 cubicmap_tex = texture(my_cube_map, R).xyz;
  vec3 specularmap_tex = texture(reflect_texture, fs_in.texcoord).xyz;
  float ref_alpha = use_tex ? 0.5 : 1.0;
- float R0 = 0.03;
- float fresnel = R0 + (1-R0)*pow(1-dot(V,N),5);
+ float R0 = 0.43;
+ float fresnel = R0 + (1-R0)*pow(1-clamp(dot(V,N),0.0,1.0),5);
  vec3 ref = ref_alpha * fresnel * specularmap_tex * cubicmap_tex;
 
  fColor.xyz = amb + diff + ref;

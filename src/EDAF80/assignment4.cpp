@@ -1,4 +1,5 @@
 #include "assignment4.hpp"
+#include "parametric_shapes.hpp"
 
 #include "config.hpp"
 #include "core/Bonobo.h"
@@ -64,6 +65,10 @@ edaf80::Assignment4::run()
 	//
 	// Todo: Load your geometry
 	//
+	auto const plane = parametric_shapes::createQuad(5, 5);
+	if (plane.vao == 0u) {
+		LogError("Failed to load sphere");
+	}
 
 	glEnable(GL_DEPTH_TEST);
 

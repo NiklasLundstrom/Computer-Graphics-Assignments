@@ -18,7 +18,7 @@ out VS_OUT {
 void main()
 {
   vec3 worldVertex = (vertex_model_to_world*vec4(vertex,1.0)).xyz;
-  vs_out.normal = (normal_model_to_world*vec4(normal,1.0)).xyz;
+  vs_out.normal = (normal_model_to_world*vec4(normal,0.0)).xyz;
   vs_out.V = camera_position - worldVertex;
 
   gl_Position = vertex_world_to_clip * vertex_model_to_world * vec4(vertex, 1.0);
