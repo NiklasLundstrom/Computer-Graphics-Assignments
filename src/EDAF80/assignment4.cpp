@@ -1,4 +1,6 @@
 #include "assignment4.hpp"
+#include "interpolation.hpp"
+#include "parametric_shapes.hpp"
 
 #include "config.hpp"
 #include "core/Bonobo.h"
@@ -8,12 +10,28 @@
 #include "core/LogView.h"
 #include "core/Misc.h"
 #include "core/ShaderProgramManager.hpp"
+#include "core/node.hpp"
 
 #include <imgui.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <external/imgui_impl_glfw_gl3.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <tinyfiledialogs.h>
 
+#include <cstdlib>
 #include <stdexcept>
+
+enum class polygon_mode_t : unsigned int {
+	fill = 0u,
+	line,
+	point
+};
+
+static polygon_mode_t get_next_mode(polygon_mode_t mode)
+{
+	return static_cast<polygon_mode_t>((static_cast<unsigned int>(mode) + 1u) % 3u);
+}
 
 edaf80::Assignment4::Assignment4() :
 	mCamera(0.5f * glm::half_pi<float>(),
@@ -64,7 +82,23 @@ edaf80::Assignment4::run()
 	//
 	// Todo: Load your geometry
 	//
+	auto const quad = parametric_shapes::createQuad(50, 50);
+	if (quad.vao == 0u) {
+		LogError("Failed to load sphere");
+	}
 
+	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
+
+	auto const set_uniforms = [&light_position](GLuint program) {
+		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
+	};
+
+	auto quadNode = Node();
+	quadNode.set_geometry(quad);
+	quadNode.set_program(&fallback_shader, set_uniforms);
+
+
+	auto polygon_mode = polygon_mode_t::fill;
 	glEnable(GL_DEPTH_TEST);
 
 	// Enable face culling to improve performance:
@@ -129,9 +163,27 @@ edaf80::Assignment4::run()
 			//
 			// Todo: Render all your geometry here.
 			//
+			quadNode.render(mCamera.GetWorldToClipMatrix(), quadNode.get_transform());
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+		// set up z-press
+		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
+			polygon_mode = get_next_mode(polygon_mode);
+		}
+		switch (polygon_mode) {
+		case polygon_mode_t::fill:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			break;
+		case polygon_mode_t::line:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			break;
+		case polygon_mode_t::point:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+			break;
+		}
+
 
 		//
 		// Todo: If you want a custom ImGUI window, you can set it up

@@ -297,8 +297,8 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 	// the image files and return a `std::vector<u8>` containing all the
 	// texels.
 	u32 width, height;
-	auto data = getTextureData("cubemaps/" + negx, width, height, false);
-	if (data.empty()) {
+	auto datanegx = getTextureData("cubemaps/" + negx, width, height, false);
+	if (datanegx.empty()) {
 		glDeleteTextures(1, &texture);
 		return 0u;
 	}
@@ -319,83 +319,55 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 	             /* must always be 0 */0,
 	             /* the format of the pixel data: which components are available */GL_RGBA,
 	             /* the type of each component */GL_UNSIGNED_BYTE,
-	             /* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
+	             /* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(datanegx.data()));
 
-	auto data = getTextureData("cubemaps/" + negy, width, height, false);
-	if (data.empty()) {
+	auto datanegy = getTextureData("cubemaps/" + negy, width, height, false);
+	if (datanegy.empty()) {
 		glDeleteTextures(1, &texture);
 		return 0u;
 	}
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-		/* mipmap level, you'll see that in EDAN35 */0,
-		/* how are the components internally stored */GL_RGBA,
-		/* the width of the cube map's face */static_cast<GLsizei>(width),
-		/* the height of the cube map's face */static_cast<GLsizei>(height),
-		/* must always be 0 */0,
-		/* the format of the pixel data: which components are available */GL_RGBA,
-		/* the type of each component */GL_UNSIGNED_BYTE,
-		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
-	auto data = getTextureData("cubemaps/" + negz, width, height, false);
-	if (data.empty()) {
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, static_cast<GLsizei>(width),
+					static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+					reinterpret_cast<GLvoid const*>(datanegy.data()));
+
+	auto datanegz = getTextureData("cubemaps/" + negz, width, height, false);
+	if (datanegz.empty()) {
 		glDeleteTextures(1, &texture);
 		return 0u;
 	}
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
-		/* mipmap level, you'll see that in EDAN35 */0,
-		/* how are the components internally stored */GL_RGBA,
-		/* the width of the cube map's face */static_cast<GLsizei>(width),
-		/* the height of the cube map's face */static_cast<GLsizei>(height),
-		/* must always be 0 */0,
-		/* the format of the pixel data: which components are available */GL_RGBA,
-		/* the type of each component */GL_UNSIGNED_BYTE,
-		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, static_cast<GLsizei>(width),
+					static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+					reinterpret_cast<GLvoid const*>(datanegz.data()));
 
-	auto data = getTextureData("cubemaps/" + posx, width, height, false);
-	if (data.empty()) {
+	auto dataposx = getTextureData("cubemaps/" + posx, width, height, false);
+	if (dataposx.empty()) {
 		glDeleteTextures(1, &texture);
 		return 0u;
 	}
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-		/* mipmap level, you'll see that in EDAN35 */0,
-		/* how are the components internally stored */GL_RGBA,
-		/* the width of the cube map's face */static_cast<GLsizei>(width),
-		/* the height of the cube map's face */static_cast<GLsizei>(height),
-		/* must always be 0 */0,
-		/* the format of the pixel data: which components are available */GL_RGBA,
-		/* the type of each component */GL_UNSIGNED_BYTE,
-		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
-	auto data = getTextureData("cubemaps/" + posy, width, height, false);
-	if (data.empty()) {
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, static_cast<GLsizei>(width),
+					static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+					reinterpret_cast<GLvoid const*>(dataposx.data()));
+
+	auto dataposy = getTextureData("cubemaps/" + posy, width, height, false);
+	if (dataposy.empty()) {
 		glDeleteTextures(1, &texture);
 		return 0u;
 	}
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-		/* mipmap level, you'll see that in EDAN35 */0,
-		/* how are the components internally stored */GL_RGBA,
-		/* the width of the cube map's face */static_cast<GLsizei>(width),
-		/* the height of the cube map's face */static_cast<GLsizei>(height),
-		/* must always be 0 */0,
-		/* the format of the pixel data: which components are available */GL_RGBA,
-		/* the type of each component */GL_UNSIGNED_BYTE,
-		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
-	auto data = getTextureData("cubemaps/" + posz, width, height, false);
-	if (data.empty()) {
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, static_cast<GLsizei>(width),
+					static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+					reinterpret_cast<GLvoid const*>(dataposy.data()));
+
+	auto dataposz = getTextureData("cubemaps/" + posz, width, height, false);
+	if (dataposz.empty()) {
 		glDeleteTextures(1, &texture);
 		return 0u;
 	}
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-		/* mipmap level, you'll see that in EDAN35 */0,
-		/* how are the components internally stored */GL_RGBA,
-		/* the width of the cube map's face */static_cast<GLsizei>(width),
-		/* the height of the cube map's face */static_cast<GLsizei>(height),
-		/* must always be 0 */0,
-		/* the format of the pixel data: which components are available */GL_RGBA,
-		/* the type of each component */GL_UNSIGNED_BYTE,
-		/* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
-	//! \todo repeat now the texture filling for the 5 remaining faces
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, static_cast<GLsizei>(width),
+					static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+					reinterpret_cast<GLvoid const*>(dataposz.data()));
 
 	if (generate_mipmap)
 		// Generate the mipmap hierarchy; wait for EDAN35 to understand

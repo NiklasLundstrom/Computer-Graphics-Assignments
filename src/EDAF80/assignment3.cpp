@@ -58,14 +58,17 @@ void
 edaf80::Assignment3::run()
 {
 	// Load the sphere geometry
-	//auto teapot = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
+	//auto sphere = parametric_shapes::createSphere(4u, 60u, 1.0f);
 	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("utah-teapot.obj");
 	bonobo::mesh_data const& teapot_shape = objects.front();
 	if (teapot_shape.vao == 0u) {
-		LogError("Failed to retrieve the circle ring mesh");
+		LogError("Failed to retrieve the teapot");
 		return;
 	}
-
+	auto const sphere = parametric_shapes::createSphere(40, 40, 0.25);
+	if (sphere.vao == 0u) {
+		LogError("Failed to load sphere");
+	}
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	mCamera.mMouseSensitivity = 0.003f;
@@ -131,6 +134,20 @@ edaf80::Assignment3::run()
 	if (normal_mapping == 0u) {
 		LogError("Failed to load normal mapping");
 	}
+	GLuint skybox = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/skybox.vert" },
+											   { ShaderType::fragment, "EDAF80/skybox.frag" } },
+		skybox);
+	if (skybox == 0u) {
+		LogError("Failed to load skybox");
+	}
+	GLuint reflective = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/reflective.vert" },
+											   { ShaderType::fragment, "EDAF80/reflective.frag" } },
+		reflective);
+	if (reflective == 0u) {
+		LogError("Failed to load reflective");
+	}
 
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
 
@@ -155,23 +172,38 @@ edaf80::Assignment3::run()
 	auto polygon_mode = polygon_mode_t::fill;
 
 	auto teapot = Node();
+	//teapot.set_geometry(sphere);
+	//teapot.scale(glm::vec3(100.0,100.0,100.0));
 	teapot.set_geometry(teapot_shape);
 	teapot.set_program(&fallback_shader, set_uniforms);
 
 	// texture
-	GLuint const image_texture = bonobo::loadTexture2D("fieldstone_diffuse.png");
+	GLuint const image_texture = bonobo::loadTexture2D("TerrainRock_0017_Color.png");
 	teapot.add_texture("diffuse_texture", image_texture, GL_TEXTURE_2D);
 
 	// normal mapping
-	GLuint const normal_texture = bonobo::loadTexture2D("fieldstone_bump.png");
+	GLuint const normal_texture = bonobo::loadTexture2D("TerrainRock_0016_Normal.png");
 	teapot.add_texture("normal_texture", normal_texture, GL_TEXTURE_2D);
 
 	// cubemapping
-	auto my_cube_map_id = bonobo::loadTextureCubeMap("opensea/posx.png", "sunset_sky/negx.png",
+	auto my_cube_map_id = bonobo::loadTextureCubeMap("sunset_sky/posx.png", "sunset_sky/negx.png",
 		"sunset_sky/posy.png", "sunset_sky/negy.png",
 		"sunset_sky/posz.png", "sunset_sky/negz.png", true);
-
 	teapot.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
+
+	// specular map
+	GLuint const reflect_texture = bonobo::loadTexture2D("TerrainRock_0016_Specular.png");
+	teapot.add_texture("reflect_texture", reflect_texture, GL_TEXTURE_2D);
+
+
+	
+
+	auto sky = Node();
+	sky.set_geometry(sphere);
+	sky.scale(glm::vec3(1000.0, 1000.0, 1000.0));
+	sky.set_program(&skybox, set_uniforms);
+	sky.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
+
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -232,6 +264,9 @@ edaf80::Assignment3::run()
 		if (inputHandler.GetKeycodeState(GLFW_KEY_8) & JUST_PRESSED) {
 			teapot.set_program(&normal_mapping, phong_set_uniforms);
 		}
+		if (inputHandler.GetKeycodeState(GLFW_KEY_9) & JUST_PRESSED) {
+			teapot.set_program(&reflective, phong_set_uniforms);
+		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
 			polygon_mode = get_next_mode(polygon_mode);
 		}
@@ -271,13 +306,14 @@ edaf80::Assignment3::run()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		teapot.render(mCamera.GetWorldToClipMatrix(), teapot.get_transform());
+		sky.render(mCamera.GetWorldToClipMatrix(), sky.get_transform());
 
 		bool opened = ImGui::Begin("Scene Control", &opened, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
 			ImGui::ColorEdit3("Ambient", glm::value_ptr(ambient));
 			ImGui::ColorEdit3("Diffuse", glm::value_ptr(diffuse));
 			ImGui::ColorEdit3("Specular", glm::value_ptr(specular));
-			ImGui::SliderFloat("Shininess", &shininess, 0.0f, 1000.0f);
+			ImGui::SliderFloat("Shininess", &shininess, 0.0f, 500.0f);
 			ImGui::SliderFloat3("Light Position", glm::value_ptr(light_position), -20.0f, 20.0f);
 		}
 		ImGui::End();
