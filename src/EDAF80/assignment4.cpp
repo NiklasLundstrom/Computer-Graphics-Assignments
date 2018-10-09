@@ -78,6 +78,13 @@ edaf80::Assignment4::run()
 	// Todo: Insert the creation of other shader programs.
 	//       (Check how it was done in assignment 3.)
 	//
+	GLuint skybox = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/skybox.vert" },
+											   { ShaderType::fragment, "EDAF80/skybox.frag" } },
+		skybox);
+	if (skybox == 0u) {
+		LogError("Failed to load skybox");
+	}
 
 	//
 	// Todo: Load your geometry
@@ -85,6 +92,11 @@ edaf80::Assignment4::run()
 	auto const quad = parametric_shapes::createQuad(50, 50);
 	if (quad.vao == 0u) {
 		LogError("Failed to load quad");
+	}
+
+	auto const sphere = parametric_shapes::createSphere(40, 40, 0.25);
+	if (sphere.vao == 0u) {
+		LogError("Failed to load sphere");
 	}
 
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
@@ -114,6 +126,22 @@ edaf80::Assignment4::run()
 	quadNode.scale(glm::vec3(50, 50, 50));
 	quadNode.set_translation(glm::vec3(0, -4, 0));
 
+	// normal mapping
+	GLuint const normal_texture = bonobo::loadTexture2D("waves.png");
+	quadNode.add_texture("normal_texture", normal_texture, GL_TEXTURE_2D);
+
+	// cubemapping
+	auto my_cube_map_id = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
+		"cloudyhills/posy.png", "cloudyhills/negy.png",
+		"cloudyhills/posz.png", "cloudyhills/negz.png", true);
+	quadNode.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
+
+
+	auto sky = Node();
+	sky.set_geometry(sphere);
+	sky.scale(glm::vec3(1000.0, 1000.0, 1000.0));
+	sky.set_program(&skybox, set_uniforms);
+	sky.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
 
 	auto polygon_mode = polygon_mode_t::fill;
 	glEnable(GL_DEPTH_TEST);
@@ -122,7 +150,6 @@ edaf80::Assignment4::run()
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_FRONT);
 	//glCullFace(GL_BACK);
-
 
 	f64 ddeltatime;
 	size_t fpsSamples = 0;
@@ -205,6 +232,7 @@ edaf80::Assignment4::run()
 			// Todo: Render all your geometry here.
 			//
 			quadNode.render(mCamera.GetWorldToClipMatrix(), quadNode.get_transform());
+			sky.render(mCamera.GetWorldToClipMatrix(), sky.get_transform());
 		}
 
 
