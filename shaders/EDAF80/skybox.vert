@@ -12,11 +12,13 @@ uniform vec3 camera_position;
 out VS_OUT{
 	vec3 normal;
 	vec3 V; // view vector
+	vec3 vertex;
 } vs_out;
 
 void main()
 {
 	vec3 worldVertex = (vertex_model_to_world * vec4(vertex,1.0)).xyz;
+	vs_out.vertex = worldVertex;
 	vs_out.normal = (normal_model_to_world * vec4(normal,0.0)).xyz;
 	vs_out.V = camera_position - worldVertex;
 

@@ -69,6 +69,12 @@ edaf80::Assignment3::run()
 	if (sphere.vao == 0u) {
 		LogError("Failed to load sphere");
 	}
+	std::vector<bonobo::mesh_data> const objects2 = bonobo::loadObjects("box.obj");
+	bonobo::mesh_data const& cube = objects2.front();
+	if (cube.vao == 0u) {
+		LogError("Failed to retrieve the cube");
+		return;
+	}
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	mCamera.mMouseSensitivity = 0.003f;
@@ -182,7 +188,7 @@ edaf80::Assignment3::run()
 	teapot.add_texture("diffuse_texture", image_texture, GL_TEXTURE_2D);
 
 	// normal mapping
-	GLuint const normal_texture = bonobo::loadTexture2D("TerrainRock_0016_Normal.png");
+	GLuint const normal_texture = bonobo::loadTexture2D("holes_bump.png");
 	teapot.add_texture("normal_texture", normal_texture, GL_TEXTURE_2D);
 
 	// cubemapping
