@@ -45,12 +45,12 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	for (int i = 0; i < width - 1; i++){
 		for (int j = 0; j < height - 1; j++){
 			indices[index] = glm::uvec3(j + i*height,
-										j + (i+1u)*height,
-										j + (i + 1u)*height + 1u);
+										j + (i + 1u)*height + 1u,
+										j + (i+1u)*height);
 
 			indices[index + 1] = glm::uvec3(j + i*height,
-											j + (i + 1u)*height + 1u,
-											j  + i*height + 1u);
+											j  + i*height + 1u,
+											j + (i + 1u)*height + 1u);
 			index += 2;
 
 		}

@@ -82,9 +82,9 @@ edaf80::Assignment4::run()
 	//
 	// Todo: Load your geometry
 	//
-	auto const quad = parametric_shapes::createQuad(50, 50);
+	auto const quad = parametric_shapes::createQuad(5, 5);
 	if (quad.vao == 0u) {
-		LogError("Failed to load sphere");
+		LogError("Failed to load quad");
 	}
 
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);

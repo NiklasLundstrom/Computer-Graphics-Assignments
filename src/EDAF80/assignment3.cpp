@@ -184,7 +184,7 @@ edaf80::Assignment3::run()
 	teapot.set_program(&fallback_shader, set_uniforms);
 
 	// texture
-	GLuint const image_texture = bonobo::loadTexture2D("TerrainRock_0017_Color.png");
+	GLuint const image_texture = bonobo::loadTexture2D("TerrainRock_0016_Color.png");
 	teapot.add_texture("diffuse_texture", image_texture, GL_TEXTURE_2D);
 
 	// normal mapping
@@ -201,8 +201,6 @@ edaf80::Assignment3::run()
 	GLuint const reflect_texture = bonobo::loadTexture2D("TerrainRock_0016_Specular.png");
 	teapot.add_texture("reflect_texture", reflect_texture, GL_TEXTURE_2D);
 
-
-	
 
 	auto sky = Node();
 	sky.set_geometry(sphere);
