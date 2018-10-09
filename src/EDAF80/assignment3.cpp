@@ -202,8 +202,6 @@ edaf80::Assignment3::run()
 	teapot.add_texture("reflect_texture", reflect_texture, GL_TEXTURE_2D);
 
 
-	
-
 	auto sky = Node();
 	sky.set_geometry(sphere);
 	sky.scale(glm::vec3(1000.0, 1000.0, 1000.0));
@@ -309,7 +307,7 @@ edaf80::Assignment3::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		teapot.render(mCamera.GetWorldToClipMatrix(), teapot.get_transform());
 		sky.render(mCamera.GetWorldToClipMatrix(), sky.get_transform());
