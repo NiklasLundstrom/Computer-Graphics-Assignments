@@ -56,12 +56,6 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 		}
 	}
 
-	
-
-	
-	
-
-
 	bonobo::mesh_data data;
 	auto const vertices_offset = 0u;
 	auto const vertices_size = static_cast<GLsizeiptr>(vertices.size() * sizeof(glm::vec3));

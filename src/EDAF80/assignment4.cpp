@@ -96,6 +96,8 @@ edaf80::Assignment4::run()
 	auto quadNode = Node();
 	quadNode.set_geometry(quad);
 	quadNode.set_program(&fallback_shader, set_uniforms);
+	quadNode.scale(glm::vec3(100, 100, 100));
+	quadNode.set_translation(glm::vec3(0, -4, 0));
 
 
 	auto polygon_mode = polygon_mode_t::fill;
