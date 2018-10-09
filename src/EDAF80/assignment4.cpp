@@ -82,20 +82,37 @@ edaf80::Assignment4::run()
 	//
 	// Todo: Load your geometry
 	//
-	auto const quad = parametric_shapes::createQuad(5, 5);
+	auto const quad = parametric_shapes::createQuad(50, 50);
 	if (quad.vao == 0u) {
 		LogError("Failed to load quad");
 	}
 
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
+	auto camera_position = mCamera.mWorld.GetTranslation();
+	auto amplitude = glm::vec2(1.0f, 0.5f);
+	auto direction = glm::mat2(-1.0f, 0.0f
+							, -0.7f, 0.7f);
+	auto phase = glm::vec2(0.5f, 1.3f);
+	auto frequency = glm::vec2(0.2f, 0.4f);
+	auto sharpness = glm::vec2(2.0f, 2.0f);
+	auto time = glm::vec2(0.0f, 0.0f);
 
-	auto const set_uniforms = [&light_position](GLuint program) {
+	auto const set_uniforms = [&light_position, &camera_position, &amplitude, &direction, &phase, &frequency, &sharpness, &time](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
+		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
+		glUniform3fv(glGetUniformLocation(program, "amplitude"), 1, glm::value_ptr(amplitude));
+		glUniform3fv(glGetUniformLocation(program, "direction"), 1, glm::value_ptr(direction));
+		glUniform3fv(glGetUniformLocation(program, "phase"), 1, glm::value_ptr(phase));
+		glUniform3fv(glGetUniformLocation(program, "frequency"), 1, glm::value_ptr(frequency));
+		glUniform3fv(glGetUniformLocation(program, "sharpness"), 1, glm::value_ptr(sharpness));
+		glUniform3fv(glGetUniformLocation(program, "time"), 1, glm::value_ptr(time));
 	};
 
 	auto quadNode = Node();
 	quadNode.set_geometry(quad);
 	quadNode.set_program(&fallback_shader, set_uniforms);
+	quadNode.scale(glm::vec3(50, 50, 50));
+	quadNode.set_translation(glm::vec3(0, -4, 0));
 
 
 	auto polygon_mode = polygon_mode_t::fill;
@@ -147,26 +164,17 @@ edaf80::Assignment4::run()
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
-		//
+		// TODO: Put your shader options here, press 1, 2 etc.
+		/*if (inputHandler.GetKeycodeState(GLFW_KEY_1) & JUST_PRESSED) {
+			for (int i = 0; i < nbrP; i++) {
+				toruses[i].set_program(&fallback_shader, set_uniforms);
+			}
+			ball.set_program(&fallback_shader, set_uniforms);
+		}*/
+
+
 		// Todo: If you need to handle inputs, you can do it here
 		//
-
-
-		int framebuffer_width, framebuffer_height;
-		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
-		glViewport(0, 0, framebuffer_width, framebuffer_height);
-		glClearDepthf(1.0f);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-		if (!shader_reload_failed) {
-			//
-			// Todo: Render all your geometry here.
-			//
-			quadNode.render(mCamera.GetWorldToClipMatrix(), quadNode.get_transform());
-		}
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		// set up z-press
 		if (inputHandler.GetKeycodeState(GLFW_KEY_Z) & JUST_PRESSED) {
@@ -185,11 +193,42 @@ edaf80::Assignment4::run()
 		}
 
 
+		int framebuffer_width, framebuffer_height;
+		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
+		glViewport(0, 0, framebuffer_width, framebuffer_height);
+		glClearDepthf(1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		if (!shader_reload_failed) {
+			//
+			// Todo: Render all your geometry here.
+			//
+			quadNode.render(mCamera.GetWorldToClipMatrix(), quadNode.get_transform());
+		}
+
+
+	
+
 		//
 		// Todo: If you want a custom ImGUI window, you can set it up
 		//       here
-		//
 
+
+		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(400, 1000), -1.0f, 0);
+		if (opened) {
+			ImGui::SliderFloat("Amplitude Wave 1", &amplitude[0], 0.0f, 200.0f);
+			ImGui::SliderFloat("Amplitude Wave 2", &amplitude[1], 0.0f, 200.0f);
+			ImGui::SliderFloat("Frequency Wave 1", &frequency[0], 0.0f, 200.0f);
+			ImGui::SliderFloat("Frequency Wave 2", &frequency[1], 0.0f, 200.0f);
+			ImGui::SliderFloat("Phase Wave 1", &phase[0], 0.0f, 200.0f);
+			ImGui::SliderFloat("Phase Wave 2", &phase[1], 0.0f, 200.0f);
+			ImGui::SliderFloat("Sharpness Wave 1", &sharpness[0], 0.0f, 200.0f);
+			ImGui::SliderFloat("Sharpness Wave 2", &sharpness[1], 0.0f, 200.0f);
+		}
+		ImGui::End();
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		if (show_logs)
 			Log::View::Render();
 		if (show_gui)
@@ -197,6 +236,8 @@ edaf80::Assignment4::run()
 
 		glfwSwapBuffers(window);
 		lastTime = nowTime;
+
+
 	}
 }
 
