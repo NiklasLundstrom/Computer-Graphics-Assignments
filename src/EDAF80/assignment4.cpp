@@ -258,6 +258,7 @@ edaf80::Assignment4::run()
 		glfwSwapBuffers(window);
 		lastTime = nowTime;
 
+		time += dt;
 
 	}
 }

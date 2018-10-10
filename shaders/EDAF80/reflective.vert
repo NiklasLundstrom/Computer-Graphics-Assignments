@@ -22,7 +22,7 @@ out VS_OUT {
 void main()
 {
   vec3 worldVertex = (vertex_model_to_world*vec4(vertex,1.0)).xyz;
-  vs_out.normal = normalize((normal_model_to_world*vec4(normal,1.0)).xyz);
+  vs_out.normal = normalize((normal_model_to_world*vec4(normal,0.0)).xyz);
   vs_out.V = camera_position - worldVertex;
   vs_out.L = normalize(light_position - worldVertex);
   vs_out.texcoord = vec2(texcoord.x, texcoord.y);

@@ -96,7 +96,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 
 	glBufferSubData(GL_ARRAY_BUFFER, normals_offset, normals_size, static_cast<GLvoid const*>(normals.data()));
 	glEnableVertexAttribArray(static_cast<unsigned int>(bonobo::shader_bindings::normals));
-	glVertexAttribPointer(static_cast<unsigned int>(bonobo::shader_bindings::normals), 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid const*>(0x0));
+	glVertexAttribPointer(static_cast<unsigned int>(bonobo::shader_bindings::normals), 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid const*>(normals_offset));
 
 	glBufferSubData(GL_ARRAY_BUFFER, texcoords_offset, texcoords_size, static_cast<GLvoid const*>(texcoords.data()));
 	glEnableVertexAttribArray(static_cast<unsigned int>(bonobo::shader_bindings::texcoords));
