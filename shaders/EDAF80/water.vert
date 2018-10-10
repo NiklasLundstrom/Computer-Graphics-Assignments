@@ -37,7 +37,7 @@ void main()
   //float dHdx = wave_dx(amplitude[1], direction[1], frequency[1], phase[1], sharpness[1], time);
   //float dHdz = wave_dz(amplitude[1], direction[1], frequency[1], phase[1], sharpness[1], time);
 
-  vec4 vertex_new = vec4(vertex[0], vert1, vertex[2], 1.0); 
+  vec4 vertex_new = vec4(vertex[0], vert1, vertex[2], 1.0);
   vec3 normal_new = normal; //normalize(vec3(-dHdx, 1, -dHdz));
 
   vec4 worldVertex = vertex_model_to_world * vertex_new;
@@ -55,7 +55,7 @@ float wave(in float A, in vec2 D, in float f, in float p, in float k, in float t
   float Dx = D[0];
   float z = vertex[2];
   float Dz = D[1];
-  float y = A * pow( sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k);
+  float y = A*pow( sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k);
   return y;
 }
 /* float wave_dx(float A, vec2 D, float f, float p, float k, float t){
@@ -63,7 +63,7 @@ float wave(in float A, in vec2 D, in float f, in float p, in float k, in float t
   float Dx = D[0];
   float z = vertex[2];
   float Dz = D[1];
-  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dx; 
+  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dx;
 }
 
 float wave_dz(float A, vec2 D, float f, float p, float k, float t){
@@ -71,6 +71,6 @@ float wave_dz(float A, vec2 D, float f, float p, float k, float t){
   float Dx = D[0];
   float z = vertex[2];
   float Dz = D[1];
-  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dz; 
+  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dz;
 }
 */

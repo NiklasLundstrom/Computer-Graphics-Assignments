@@ -123,7 +123,7 @@ edaf80::Assignment4::run()
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
 		glUniform2fv(glGetUniformLocation(program, "amplitude"), 1, glm::value_ptr(amplitude));
-		glUniform2fv(glGetUniformLocation(program, "direction"), 1, glm::value_ptr(direction));
+		glUniform4fv(glGetUniformLocation(program, "direction"), 1, glm::value_ptr(direction));
 		glUniform2fv(glGetUniformLocation(program, "phase"), 1, glm::value_ptr(phase));
 		glUniform2fv(glGetUniformLocation(program, "frequency"), 1, glm::value_ptr(frequency));
 		glUniform2fv(glGetUniformLocation(program, "sharpness"), 1, glm::value_ptr(sharpness));
