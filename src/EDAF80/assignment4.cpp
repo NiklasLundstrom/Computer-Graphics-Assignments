@@ -97,7 +97,7 @@ edaf80::Assignment4::run()
 	//
 	// Todo: Load your geometry
 	//
-	auto const quad = parametric_shapes::createQuad(50, 50);
+	auto const quad = parametric_shapes::createQuad(500, 500);
 	if (quad.vao == 0u) {
 		LogError("Failed to load quad");
 	}
@@ -110,7 +110,7 @@ edaf80::Assignment4::run()
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto amplitude = glm::vec2(1.0f, 0.5f);
-	auto direction = glm::mat2(-1.0f, 0.0f
+	auto direction = glm::vec4(-1.0f, 0.37f
 							, -0.7f, 0.7f);
 	auto phase = glm::vec2(0.5f, 1.3f);
 	auto frequency = glm::vec2(0.2f, 0.4f);
@@ -123,7 +123,7 @@ edaf80::Assignment4::run()
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
 		glUniform2fv(glGetUniformLocation(program, "amplitude"), 1, glm::value_ptr(amplitude));
-		glUniform2fv(glGetUniformLocation(program, "direction"), 1, glm::value_ptr(direction));
+		glUniform4fv(glGetUniformLocation(program, "direction"), 1, glm::value_ptr(direction));
 		glUniform2fv(glGetUniformLocation(program, "phase"), 1, glm::value_ptr(phase));
 		glUniform2fv(glGetUniformLocation(program, "frequency"), 1, glm::value_ptr(frequency));
 		glUniform2fv(glGetUniformLocation(program, "sharpness"), 1, glm::value_ptr(sharpness));
@@ -202,15 +202,6 @@ edaf80::Assignment4::run()
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
-		// TODO: Put your shader options here, press 1, 2 etc.
-		/*if (inputHandler.GetKeycodeState(GLFW_KEY_1) & JUST_PRESSED) {
-			for (int i = 0; i < nbrP; i++) {
-				toruses[i].set_program(&fallback_shader, set_uniforms);
-			}
-			ball.set_program(&fallback_shader, set_uniforms);
-		}*/
-
-
 		// Todo: If you need to handle inputs, you can do it here
 		//
 
@@ -230,6 +221,7 @@ edaf80::Assignment4::run()
 			break;
 		}
 
+		camera_position = mCamera.mWorld.GetTranslation();
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
@@ -239,19 +231,9 @@ edaf80::Assignment4::run()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		if (!shader_reload_failed) {
-			//
-			// Todo: Render all your geometry here.
-			//
 			quadNode.render(mCamera.GetWorldToClipMatrix(), quadNode.get_transform());
 			sky.render(mCamera.GetWorldToClipMatrix(), sky.get_transform());
 		}
-
-
-	
-
-		//
-		// Todo: If you want a custom ImGUI window, you can set it up
-		//       here
 
 
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(400, 1000), -1.0f, 0);
