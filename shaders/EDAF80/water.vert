@@ -7,6 +7,8 @@ float wave_dz(float A, vec2 D, float f, float p, float k, float t);
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 texcoord;
+layout (location = 3) in vec3 tangent;
+layout (location = 4) in vec3 binormal;
 
 uniform mat4 vertex_model_to_world;
 uniform mat4 normal_model_to_world;
@@ -22,15 +24,18 @@ uniform vec4 direction;
 uniform float time;
 
 out VS_OUT {
-  out vec3 normal; // Normal (from vertex shader)
-  out vec3 V; // View vector (from VS)
-  out vec3 L; // Light position
+  vec3 normal; // Normal (from vertex shader)
+  vec3 tangent;
+  vec3 binormal;
+  vec3 V; // View vector (from VS)
+  vec3 L; // Light position
   vec2 texcoord;
 } vs_out;
 
 
 void main()
 {
+  vs_out.texcoord = vec2(texcoord.x, texcoord.y);
 
   float vert1 = wave(amplitude.x, normalize(direction.xy), frequency.x, phase.x, sharpness.x, time);
   float vert2 = wave(amplitude.y, normalize(direction.zw), frequency.y, phase.y, sharpness.y, time);
@@ -41,7 +46,9 @@ void main()
   vec3 normal_new = normalize(vec3(-dHdx, 1, -dHdz));
 
   vec4 worldVertex = vertex_model_to_world * vertex_new;
-  vs_out.normal = normalize((normal_model_to_world * vec4(normal_new,0)).xyz);
+  vs_out.normal = normal_new;
+  vs_out.tangent = tangent;
+  vs_out.binormal = binormal;
   vs_out.V = normalize(camera_position - worldVertex.xyz);
   vs_out.L = normalize(light_position - worldVertex.xyz);
   vs_out.texcoord = vec2(texcoord.x, texcoord.y);
