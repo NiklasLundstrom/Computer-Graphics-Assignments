@@ -61,7 +61,7 @@ edaf80::Assignment4::run()
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	mCamera.mMouseSensitivity = 0.003f;
-	mCamera.mMovementSpeed = 0.025;
+	mCamera.mMovementSpeed = 0.025f;
 
 	// Create the shader programs
 	ShaderProgramManager program_manager;
@@ -86,6 +86,14 @@ edaf80::Assignment4::run()
 		LogError("Failed to load skybox");
 	}
 
+	GLuint water = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/water.vert" },
+											   { ShaderType::fragment, "EDAF80/water.frag" } },
+		water);
+	if (water == 0u) {
+		LogError("Failed to load water");
+	}
+
 	//
 	// Todo: Load your geometry
 	//
@@ -107,22 +115,24 @@ edaf80::Assignment4::run()
 	auto phase = glm::vec2(0.5f, 1.3f);
 	auto frequency = glm::vec2(0.2f, 0.4f);
 	auto sharpness = glm::vec2(2.0f, 2.0f);
-	auto time = glm::vec2(0.0f, 0.0f);
+	float time = 0.0f;
+	float dt = 0.1f;
+
 
 	auto const set_uniforms = [&light_position, &camera_position, &amplitude, &direction, &phase, &frequency, &sharpness, &time](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
-		glUniform3fv(glGetUniformLocation(program, "amplitude"), 1, glm::value_ptr(amplitude));
-		glUniform3fv(glGetUniformLocation(program, "direction"), 1, glm::value_ptr(direction));
-		glUniform3fv(glGetUniformLocation(program, "phase"), 1, glm::value_ptr(phase));
-		glUniform3fv(glGetUniformLocation(program, "frequency"), 1, glm::value_ptr(frequency));
-		glUniform3fv(glGetUniformLocation(program, "sharpness"), 1, glm::value_ptr(sharpness));
-		glUniform3fv(glGetUniformLocation(program, "time"), 1, glm::value_ptr(time));
+		glUniform2fv(glGetUniformLocation(program, "amplitude"), 1, glm::value_ptr(amplitude));
+		glUniform2fv(glGetUniformLocation(program, "direction"), 1, glm::value_ptr(direction));
+		glUniform2fv(glGetUniformLocation(program, "phase"), 1, glm::value_ptr(phase));
+		glUniform2fv(glGetUniformLocation(program, "frequency"), 1, glm::value_ptr(frequency));
+		glUniform2fv(glGetUniformLocation(program, "sharpness"), 1, glm::value_ptr(sharpness));
+		glUniform1f(glGetUniformLocation(program, "time"), time);
 	};
 
 	auto quadNode = Node();
 	quadNode.set_geometry(quad);
-	quadNode.set_program(&fallback_shader, set_uniforms);
+	quadNode.set_program(&water, set_uniforms);
 
 	quadNode.scale(glm::vec3(50, 50, 50));
 	quadNode.set_translation(glm::vec3(0, -4, 0));
@@ -246,8 +256,8 @@ edaf80::Assignment4::run()
 
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(400, 1000), -1.0f, 0);
 		if (opened) {
-			ImGui::SliderFloat("Amplitude Wave 1", &amplitude[0], 0.0f, 200.0f);
-			ImGui::SliderFloat("Amplitude Wave 2", &amplitude[1], 0.0f, 200.0f);
+			ImGui::SliderFloat("Amplitude Wave 1", &amplitude[0], 0.0f, 1.0f);
+			ImGui::SliderFloat("Amplitude Wave 2", &amplitude[1], 0.0f, 1.0f);
 			ImGui::SliderFloat("Frequency Wave 1", &frequency[0], 0.0f, 200.0f);
 			ImGui::SliderFloat("Frequency Wave 2", &frequency[1], 0.0f, 200.0f);
 			ImGui::SliderFloat("Phase Wave 1", &phase[0], 0.0f, 200.0f);

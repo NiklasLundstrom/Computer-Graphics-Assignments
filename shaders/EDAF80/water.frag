@@ -15,7 +15,7 @@ out vec4 fColor;
 
 void main()
 {
- float facing = 1 - max(dot(V,normal), 0);
+ float facing = 1 - max(dot(fs_in.V, fs_in.normal), 0);
  fColor.xyz = mix( color_deep, color_shallow, facing);
  fColor.w = 1.0;
 }
