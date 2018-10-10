@@ -23,17 +23,19 @@ uniform vec4 direction;
 uniform float time;
 
 out VS_OUT {
-  out vec3 normal; // Normal (from vertex shader)
-  out vec3 V; // View vector (from VS)
-  out vec3 L; // Light position
-  vec2 texcoord;
+  vec3 normal; // Normal (from vertex shader)
   vec3 tangent;
   vec3 binormal;
+  vec3 V; // View vector (from VS)
+  vec3 L; // Light position
+  vec2 texcoord;
 } vs_out;
 
 
 void main()
 {
+  vs_out.texcoord = vec2(texcoord.x, texcoord.y);
+
   // fix y-value on waves
   float vert1 = wave(amplitude.x, normalize(direction.xy), frequency.x, phase.x, sharpness.x, time);
   float vert2 = wave(amplitude.y, normalize(direction.zw), frequency.y, phase.y, sharpness.y, time);
@@ -48,7 +50,9 @@ void main()
 
 
   vec4 worldVertex = vertex_model_to_world * vertex_new;
-  vs_out.normal = normalize((vec4(normal_new,0)).xyz);
+  vs_out.normal = normal_new;
+  vs_out.tangent = tangent;
+  vs_out.binormal = binormal;
   vs_out.V = normalize(camera_position - worldVertex.xyz);
   vs_out.L = normalize(light_position - worldVertex.xyz);
   vs_out.texcoord = vec2(texcoord.x, texcoord.y);
@@ -63,7 +67,7 @@ float wave(in float A, in vec2 D, in float f, in float p, in float k, in float t
   float Dx = D[0];
   float z = vertex[2];
   float Dz = D[1];
-  float y = A * pow( sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k);
+  float y = A*pow( sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k);
   return y;
 }
 float wave_dx(float A, vec2 D, float f, float p, float k, float t){
@@ -71,7 +75,7 @@ float wave_dx(float A, vec2 D, float f, float p, float k, float t){
   float Dx = D[0];
   float z = vertex[2];
   float Dz = D[1];
-  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dx; 
+  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dx;
 }
 
 float wave_dz(float A, vec2 D, float f, float p, float k, float t){
@@ -79,6 +83,5 @@ float wave_dz(float A, vec2 D, float f, float p, float k, float t){
   float Dx = D[0];
   float z = vertex[2];
   float Dz = D[1];
-  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dz; 
+  return 0.5*k*f*A* pow(sin( (Dx*x + Dz*z) * f + t*p)*0.5 + 0.5, k-1) * cos((Dx*x + Dz*z) * f + t*p) * Dz;
 }
-

@@ -234,18 +234,17 @@ edaf80::Assignment4::run()
 			quadNode.render(mCamera.GetWorldToClipMatrix(), quadNode.get_transform());
 			sky.render(mCamera.GetWorldToClipMatrix(), sky.get_transform());
 		}
-
-
+		time += dt;
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(400, 1000), -1.0f, 0);
 		if (opened) {
 			ImGui::SliderFloat("Amplitude Wave 1", &amplitude[0], 0.0f, 1.0f);
 			ImGui::SliderFloat("Amplitude Wave 2", &amplitude[1], 0.0f, 1.0f);
-			ImGui::SliderFloat("Frequency Wave 1", &frequency[0], 0.0f, 200.0f);
-			ImGui::SliderFloat("Frequency Wave 2", &frequency[1], 0.0f, 200.0f);
-			ImGui::SliderFloat("Phase Wave 1", &phase[0], 0.0f, 200.0f);
-			ImGui::SliderFloat("Phase Wave 2", &phase[1], 0.0f, 200.0f);
-			ImGui::SliderFloat("Sharpness Wave 1", &sharpness[0], 0.0f, 200.0f);
-			ImGui::SliderFloat("Sharpness Wave 2", &sharpness[1], 0.0f, 200.0f);
+			ImGui::SliderFloat("Frequency Wave 1", &frequency[0], 0.0f, 20.0f);
+			ImGui::SliderFloat("Frequency Wave 2", &frequency[1], 0.0f, 20.0f);
+			ImGui::SliderFloat("Phase Wave 1", &phase[0], 0.0f, 20.0f);
+			ImGui::SliderFloat("Phase Wave 2", &phase[1], 0.0f, 20.0f);
+			ImGui::SliderFloat("Sharpness Wave 1", &sharpness[0], 0.0f, 20.0f);
+			ImGui::SliderFloat("Sharpness Wave 2", &sharpness[1], 0.0f, 20.0f);
 		}
 		ImGui::End();
 

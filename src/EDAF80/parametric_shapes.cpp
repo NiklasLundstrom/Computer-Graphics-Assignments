@@ -30,6 +30,12 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 			vertices[index] = glm::vec3( -1 + 2*i/( (float) width-1),
 				0,
 				 -1 + 2 * j / ((float) height - 1));
+
+			// texture coordinates
+			texcoords[index] = glm::vec3(static_cast<float>(j) / (static_cast<float>(height) - 1.0f),
+				static_cast<float>(i) / (static_cast<float>(width) - 1.0f),
+				0.0f);
+
 			// tangent
 			tangents[index] = glm::vec3(1.0f, 0.0f, 0.0f);
 			// binormal
@@ -89,10 +95,9 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	glBindBuffer(GL_ARRAY_BUFFER, data.bo);
 	glBufferData(GL_ARRAY_BUFFER, bo_size, nullptr, GL_STATIC_DRAW);
 
-
 	glBufferSubData(GL_ARRAY_BUFFER, vertices_offset, vertices_size, static_cast<GLvoid const*>(vertices.data()));
 	glEnableVertexAttribArray(static_cast<unsigned int>(bonobo::shader_bindings::vertices));
-	glVertexAttribPointer(static_cast<unsigned int>(bonobo::shader_bindings::vertices),3,GL_FLOAT,GL_FALSE,0,reinterpret_cast<GLvoid const*>(0x0));
+	glVertexAttribPointer(static_cast<unsigned int>(bonobo::shader_bindings::vertices), 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid const*>(0x0));
 
 	glBufferSubData(GL_ARRAY_BUFFER, normals_offset, normals_size, static_cast<GLvoid const*>(normals.data()));
 	glEnableVertexAttribArray(static_cast<unsigned int>(bonobo::shader_bindings::normals));
@@ -116,12 +121,13 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	glGenBuffers(1, &data.ibo);
 	assert(data.ibo != 0u);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(indices.size() * sizeof(glm::uvec3)),indices.data(),GL_STATIC_DRAW);
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(indices.size() * sizeof(glm::uvec3)), reinterpret_cast<GLvoid const*>(indices.data()), GL_STATIC_DRAW);
 
 	glBindVertexArray(0u);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u);
-
 	return data;
+
 }
 
 bonobo::mesh_data
