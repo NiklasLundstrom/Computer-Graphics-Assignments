@@ -42,6 +42,11 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 			binormals[index] = glm::vec3(0.0f, 0.0f, 1.0f);
 			// normals
 			normals[index] = glm::vec3(0.0f, 1.0f, 0.0f);
+			// texcoord
+			//texcoords[index] = glm::vec3(i/(width-1),0,j/(height-1));
+			texcoords[index] = glm::vec3(static_cast<float>(j) / (static_cast<float>(height) - 1.0f),
+				static_cast<float>(i) / (static_cast<float>(width) - 1.0f),
+				0.0f);
 
 			index++;
 		}
@@ -62,6 +67,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 		}
 	}
 
+	
 	bonobo::mesh_data data;
 	glGenVertexArrays(1, &data.vao);
 	assert(data.vao != 0u);
@@ -83,28 +89,6 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 		+ tangents_size
 		+ binormals_size
 		);
-
-
-	//glGenVertexArrays(1, &data.vao);
-	//glBindVertexArray(data.vao);
-	//glGenBuffers(1, &data.bo);
-	//glBindBuffer(GL_ARRAY_BUFFER, data.bo);
-	//glBufferData(GL_ARRAY_BUFFER, bo_size, vertices.data(), GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(static_cast<unsigned int>(bonobo::shader_bindings::vertices));
-	//glVertexAttribPointer(static_cast<unsigned int>(bonobo::shader_bindings::vertices),
-	//// Have the buffer's name stored into `data.ibo`.
-	//glGenBuffers(1, &data.ibo);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, /*! \todo how many bytes should the buffer contain? */static_cast<GLsizeiptr>(indices.size() * sizeof(glm::uvec3)),
-	//             /* where is the data stored on the CPU? */indices.data(),
-	//             /* inform OpenGL that the data is modified once, but used often */GL_STATIC_DRAW);
-
-	//data.indices_nb = indices.size() * 3u;
-	//glBindVertexArray(0u);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0u);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u);
-
-	//return data
 
 	glGenBuffers(1, &data.bo);
 	assert(data.bo != 0u);
@@ -137,6 +121,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	glGenBuffers(1, &data.ibo);
 	assert(data.ibo != 0u);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
+
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(indices.size() * sizeof(glm::uvec3)), reinterpret_cast<GLvoid const*>(indices.data()), GL_STATIC_DRAW);
 
 	glBindVertexArray(0u);
