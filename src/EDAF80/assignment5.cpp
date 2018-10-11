@@ -51,7 +51,7 @@ edaf80::Assignment5::run()
 	mCamera.mWorld.SetTranslate(glm::vec3(100.0f, 200.0f, 200.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025f;
-
+	
 	//
 	// Create the shader programs
 	//
@@ -174,6 +174,7 @@ edaf80::Assignment5::run()
 
 	f64 ddeltatime;
 	size_t fpsSamples = 0;
+	int currFPS = 0;
 	double nowTime, lastTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
 
@@ -186,6 +187,7 @@ edaf80::Assignment5::run()
 		ddeltatime = nowTime - lastTime;
 		if (nowTime > fpsNextTick) {
 			fpsNextTick += 1000.0;
+			currFPS = fpsSamples;
 			fpsSamples = 0;
 		}
 		fpsSamples++;
@@ -265,7 +267,13 @@ edaf80::Assignment5::run()
 		// Todo: If you want a custom ImGUI window, you can set it up
 		//       here
 		//
-
+		bool const opened = ImGui::Begin("Frames per second", nullptr, ImVec2(400, 100), -1.0f, 0);
+		if (opened) {
+			std::string FC = std::to_string(1000.0/ddeltatime);
+			ImGui::Text(FC.c_str());
+			ImGui::Text(std::to_string(currFPS).c_str());
+		}
+		ImGui::End();
 		if (show_logs)
 			Log::View::Render();
 		if (show_gui)
