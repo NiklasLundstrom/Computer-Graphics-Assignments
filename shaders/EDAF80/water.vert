@@ -40,13 +40,18 @@ void main()
   float vert1 = wave(amplitude.x, normalize(direction.xy), frequency.x, phase.x, sharpness.x, time);
   float vert2 = wave(amplitude.y, normalize(direction.zw), frequency.y, phase.y, sharpness.y, time);
 
-  vec4 vertex_new = vec4(vertex[0], vert1, vertex[2], 1.0); 
+  vec4 vertex_new = vec4(vertex[0], vert1 + vert2, vertex[2], 1.0);
 
   // Calculate new normals
-  float dHdx = wave_dx(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
-  float dHdz = wave_dz(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
+  float dHdx1 = wave_dx(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
+  float dHdz1 = wave_dz(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
 
-  vec3 normal_new = normalize(vec3(-dHdx, 1, -dHdz));
+  float dHdx2 = wave_dx(amplitude[1], normalize(direction.zw), frequency[1], phase[1], sharpness[1], time);
+  float dHdz2 = wave_dz(amplitude[1], normalize(direction.zw), frequency[1], phase[1], sharpness[1], time);
+
+  vec3 normal_new1 = normalize(vec3(-dHdx1, 1, -dHdz1));
+  vec3 normal_new2 = normalize(vec3(-dHdx2, 1, -dHdz2));
+  vec3 normal_new = normal_new1 + normal_new2;
 
 
   vec4 worldVertex = vertex_model_to_world * vertex_new;
