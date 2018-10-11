@@ -39,7 +39,7 @@ void main()
   float vert1 = wave(amplitude.x, normalize(direction.xy), frequency.x, phase.x, sharpness.x, time);
   float vert2 = wave(amplitude.y, normalize(direction.zw), frequency.y, phase.y, sharpness.y, time);
 
-  vec4 vertex_new = vec4(vertex[0], vert1+vert2, vertex[2], 1.0); 
+  vec4 vertex_new = vec4(vertex[0], vert1 + vert2, vertex[2], 1.0);
 
   // Calculate new normals
   float dHdx_1 = wave_dx(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);

@@ -59,7 +59,7 @@ void
 edaf80::Assignment4::run()
 {
 	// Set up the camera
-	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
+	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 10.0f, 130.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025f;
 
@@ -109,11 +109,11 @@ edaf80::Assignment4::run()
 
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
 	auto camera_position = mCamera.mWorld.GetTranslation();
-	auto amplitude = glm::vec2(1.0f, 0.5f);
+	auto amplitude = glm::vec2(0.192f, 0.067f);
 	auto direction = glm::vec4(-1.0f, 0.0f
 							, -0.7f, 0.7f);
-	auto phase = glm::vec2(0.5f, 1.3f);
-	auto frequency = glm::vec2(0.2f, 0.4f);
+	auto phase = glm::vec2(0.157f, 0.784f);
+	auto frequency = glm::vec2(3.373f, 1.961f);
 	auto sharpness = glm::vec2(2.0f, 2.0f);
 	float time = 0.0f;
 	float dt = 0.1f;
