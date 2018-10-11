@@ -34,30 +34,32 @@ out VS_OUT {
 
 void main()
 {
-  vs_out.texcoord = vec2(texcoord.x, texcoord.y);
 
   // fix y-value on waves
   float vert1 = wave(amplitude.x, normalize(direction.xy), frequency.x, phase.x, sharpness.x, time);
   float vert2 = wave(amplitude.y, normalize(direction.zw), frequency.y, phase.y, sharpness.y, time);
 
-  vec4 vertex_new = vec4(vertex[0], vert1, vertex[2], 1.0); 
+  vec4 vertex_new = vec4(vertex[0], vert1+vert2, vertex[2], 1.0); 
 
   // Calculate new normals
-  float dHdx = wave_dx(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
-  float dHdz = wave_dz(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
+  float dHdx_1 = wave_dx(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
+  float dHdz_1 = wave_dz(amplitude[0], normalize(direction.xy), frequency[0], phase[0], sharpness[0], time);
 
+  float dHdx_2 = wave_dx(amplitude[1], normalize(direction.zw), frequency[1], phase[1], sharpness[1], time);
+  float dHdz_2 = wave_dz(amplitude[1], normalize(direction.zw), frequency[1], phase[1], sharpness[1], time);
+
+  float dHdx = dHdx_1 + dHdx_2;
+  float dHdz = dHdz_1 + dHdz_2;
   vec3 normal_new = normalize(vec3(-dHdx, 1, -dHdz));
-
 
   vec4 worldVertex = vertex_model_to_world * vertex_new;
   vs_out.normal = normal_new;
-  vs_out.tangent = tangent;
-  vs_out.binormal = binormal;
+  vs_out.tangent = normalize(vec3(0 , dHdz, 1));// tangent;
+  vs_out.binormal = normalize(vec3(1, dHdx, 0));// binormal;
   vs_out.V = normalize(camera_position - worldVertex.xyz);
   vs_out.L = normalize(light_position - worldVertex.xyz);
-  vs_out.texcoord = vec2(texcoord.x, texcoord.y);
-  vs_out.tangent = tangent;
-  vs_out.binormal = binormal;
+  vs_out.texcoord = texcoord.xy;
+
   gl_Position = vertex_world_to_clip * worldVertex;
 }
 

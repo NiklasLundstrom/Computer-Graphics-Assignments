@@ -110,7 +110,7 @@ edaf80::Assignment4::run()
 	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto amplitude = glm::vec2(1.0f, 0.5f);
-	auto direction = glm::vec4(-1.0f, 0.37f
+	auto direction = glm::vec4(-1.0f, 0.0f
 							, -0.7f, 0.7f);
 	auto phase = glm::vec2(0.5f, 1.3f);
 	auto frequency = glm::vec2(0.2f, 0.4f);
@@ -234,7 +234,7 @@ edaf80::Assignment4::run()
 			quadNode.render(mCamera.GetWorldToClipMatrix(), quadNode.get_transform());
 			sky.render(mCamera.GetWorldToClipMatrix(), sky.get_transform());
 		}
-		time += dt;
+
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(400, 1000), -1.0f, 0);
 		if (opened) {
 			ImGui::SliderFloat("Amplitude Wave 1", &amplitude[0], 0.0f, 1.0f);
