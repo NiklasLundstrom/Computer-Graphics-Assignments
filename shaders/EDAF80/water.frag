@@ -41,10 +41,10 @@ void main()
   mat3 tangent_to_model = mat3(T, B, N);
   colorNormal = tangent_to_model * colorNormal;
   colorNormal = (normal_model_to_world * vec4(colorNormal,0.0)).xyz;
-  colorNormal = normalize(fs_in.normal);
+  colorNormal = normalize(colorNormal);
   vec3 L = normalize(fs_in.L);
 
-  float R0 = 1.5; //0.02037;
+  float R0 = 0.02037;
   float fresnel = R0 + (1-R0)*pow(1-dot(fs_in.V, colorNormal),5);
   vec3 refractDir = refract(fs_in.V, colorNormal, 1/1.33);
   vec3 reflectDir = reflect(-fs_in.V, colorNormal);
@@ -53,6 +53,6 @@ void main()
   vec3 reflection = fresnel * texture(my_cube_map, reflectDir).xyz;
   vec3 refraction = (1-fresnel)* texture(my_cube_map, refractDir).xyz;
 
-  fColor.xyz = color + reflection; //+ refraction;
+  fColor.xyz = color + reflection + refraction;
   fColor.w = 1.0;
 }
