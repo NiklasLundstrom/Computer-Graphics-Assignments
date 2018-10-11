@@ -1,0 +1,21 @@
+#version 410
+
+uniform vec3 light_position;
+uniform sampler2D height_map;
+
+in VS_OUT {
+	vec3 vertex;
+	vec3 normal;
+	vec2 texcoord;
+} fs_in;
+
+out vec4 frag_color;
+
+void main()
+{
+	vec3 color = texture(height_map, fs_in.texcoord).rgb;
+	vec3 L = normalize(light_position - fs_in.vertex);
+	vec3 dif = vec3(1.0) * clamp(dot(normalize(fs_in.normal), L), 0.0, 1.0);
+	frag_color.rgb = dif;
+	frag_color.a = 1.0;
+}

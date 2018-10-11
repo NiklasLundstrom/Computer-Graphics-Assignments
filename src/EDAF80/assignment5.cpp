@@ -48,7 +48,7 @@ edaf80::Assignment5::run()
 {	//
 	// Set up the camera
 	//
-	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 30.0f, 70.0f));
+	mCamera.mWorld.SetTranslate(glm::vec3(100.0f, 200.0f, 200.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025f;
 
@@ -73,6 +73,14 @@ edaf80::Assignment5::run()
 		LogError("Failed to load phong shader");
 	}
 
+	GLuint terrain_shader = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/terrain.vert" },
+											   { ShaderType::fragment, "EDAF80/terrain.frag" } },
+		terrain_shader);
+	if (terrain_shader == 0u) {
+		LogError("Failed to load terrain shader");
+	}
+
 	//
 	// set up height
 	//
@@ -81,7 +89,7 @@ edaf80::Assignment5::run()
 	//
 	// set up uniform variables
 	//
-	auto light_position = glm::vec3(-32.0f, 64.0f, 32.0f);
+	auto light_position = glm::vec3(-100.0f, 200.0f, 30.0f);
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto ambient = glm::vec3(0.2f, 0.1f, 0.1f);
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
@@ -138,7 +146,7 @@ edaf80::Assignment5::run()
 	car.set_translation(car_pos);
 	glm::vec3 car_dir = glm::vec3(0, 0, -1);
 	float rot_speed = glm::pi<float>()/32;
-
+	
 	// car geometry
 	
 	car_geometry.set_geometry(teapot);
@@ -149,9 +157,11 @@ edaf80::Assignment5::run()
 
 	// ground
 	ground.set_geometry(quad);
-	ground.set_scaling(glm::vec3(30, 30, 30));
+	ground.set_scaling(glm::vec3(300, 300, 300));
 	ground.set_translation(glm::vec3(0, ground_height, 0));
-	ground.set_program(&phong_shader, phong_set_uniforms);
+	ground.set_program(&terrain_shader, phong_set_uniforms);
+	GLuint const height_map = bonobo::loadTexture2D("landscape.png");
+	ground.add_texture("height_map", height_map, GL_TEXTURE_2D);
 
 
 	glEnable(GL_DEPTH_TEST);
@@ -206,13 +216,16 @@ edaf80::Assignment5::run()
 		// Todo: If you need to handle inputs, you can do it here
 		//
 		glm::mat4 rot = glm::mat4(1.0f);
+		float theta = 0.0;
 		if (inputHandler.GetKeycodeState(GLFW_KEY_RIGHT) & PRESSED) {
-			rot = glm::rotate(rot, -rot_speed, glm::vec3(0, 1, 0));
+			theta = -rot_speed;
+			rot = glm::rotate(rot, theta, glm::vec3(0, 1, 0));
 			car_dir = (rot * glm::vec4(car_dir, 1));
 			car_dir = glm::normalize(glm::vec3(car_dir.x, car_dir.y, car_dir.z));
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_LEFT) & PRESSED) {
-			rot = glm::rotate(rot, rot_speed, glm::vec3(0, 1, 0));
+			theta = rot_speed;
+			rot = glm::rotate(rot, theta, glm::vec3(0, 1, 0));
 			car_dir = (rot * glm::vec4(car_dir, 1));
 			car_dir = glm::normalize(glm::vec3(car_dir.x, car_dir.y, car_dir.z));
 		}
@@ -225,6 +238,10 @@ edaf80::Assignment5::run()
 		// update car pos
 		//
 		car.set_translation(car_pos);
+		car.rotate_y(theta);
+
+		camera_position = mCamera.mWorld.GetTranslation();
+
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
