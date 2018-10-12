@@ -51,6 +51,8 @@ edaf80::Assignment5::run()
 	mCamera.mWorld.SetTranslate(glm::vec3(100.0f, 200.0f, 200.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025f;
+
+	int chosen_cam = 1;
 	
 	//
 	// Create the shader programs
@@ -79,6 +81,14 @@ edaf80::Assignment5::run()
 		terrain_shader);
 	if (terrain_shader == 0u) {
 		LogError("Failed to load terrain shader");
+	}
+
+	GLuint car_shader = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/car.vert" },
+											   { ShaderType::fragment, "EDAF80/car.frag" } },
+		car_shader);
+	if (car_shader == 0u) {
+		LogError("Failed to load car shader");
 	}
 
 	//
@@ -127,25 +137,26 @@ edaf80::Assignment5::run()
 	//
 	// Set up node tree
 	//
-	// TODO set upp node tree
 	Node world = Node();
 		Node car = Node();
 			world.add_child(&car);
 			Node car_geometry = Node();
 				car.add_child(&car_geometry);
+			Node car_cam = Node();
+				car.add_child(&car_cam);
 		Node ground = Node();
 			world.add_child(&ground);
 
 	//
 	// set up nodes
 	//
-	// TODO set up nodes
 
 	// car
-	glm::vec3 car_pos = glm::vec3(0, ground_height, 0);
+	glm::vec3 car_pos = glm::vec3(0, ground_height, 0); // TODO vary car_pos.y according to height map
 	car.set_translation(car_pos);
 	glm::vec3 car_dir = glm::vec3(0, 0, -1);
-	float rot_speed = glm::pi<float>()/32;
+	float car_speed = 100.0;
+	float car_rot_speed = glm::pi<float>();
 	
 	// car geometry
 	
@@ -153,14 +164,18 @@ edaf80::Assignment5::run()
 	car_geometry.set_scaling(glm::vec3(1, 1, 1));
 	car_geometry.set_rotation_y(glm::half_pi<float>());
 	car_geometry.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
-	car_geometry.set_program(&phong_shader, phong_set_uniforms);
+	car_geometry.set_program(&car_shader, phong_set_uniforms);
+	GLuint const height_map = bonobo::loadTexture2D("landscape.png");
+	car_geometry.add_texture("height_map", height_map, GL_TEXTURE_2D);
+
+	// car camera
+	car_cam.set_translation(glm::vec3(0, 50, 100));
 
 	// ground
 	ground.set_geometry(quad);
 	ground.set_scaling(glm::vec3(300, 300, 300));
 	ground.set_translation(glm::vec3(0, ground_height, 0));
 	ground.set_program(&terrain_shader, phong_set_uniforms);
-	GLuint const height_map = bonobo::loadTexture2D("landscape.png");
 	ground.add_texture("height_map", height_map, GL_TEXTURE_2D);
 
 
@@ -215,26 +230,33 @@ edaf80::Assignment5::run()
 		ImGui_ImplGlfwGL3_NewFrame();
 
 		//
-		// Todo: If you need to handle inputs, you can do it here
+		// Inputs, keyboard etc.
 		//
 		glm::mat4 rot = glm::mat4(1.0f);
 		float theta = 0.0;
 		if (inputHandler.GetKeycodeState(GLFW_KEY_RIGHT) & PRESSED) {
-			theta = -rot_speed;
+			theta = -car_rot_speed*0.001 * ddeltatime;
 			rot = glm::rotate(rot, theta, glm::vec3(0, 1, 0));
 			car_dir = (rot * glm::vec4(car_dir, 1));
 			car_dir = glm::normalize(glm::vec3(car_dir.x, car_dir.y, car_dir.z));
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_LEFT) & PRESSED) {
-			theta = rot_speed;
+			theta = car_rot_speed*0.001 * ddeltatime;
 			rot = glm::rotate(rot, theta, glm::vec3(0, 1, 0));
 			car_dir = (rot * glm::vec4(car_dir, 1));
 			car_dir = glm::normalize(glm::vec3(car_dir.x, car_dir.y, car_dir.z));
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_UP) & PRESSED)
-			car_pos += glm::normalize(car_dir);
+			car_pos += glm::normalize(car_dir) * (float) (ddeltatime * car_speed*0.001);
 		if (inputHandler.GetKeycodeState(GLFW_KEY_DOWN) & PRESSED)
-			car_pos -= glm::normalize(car_dir);;
+			car_pos -= glm::normalize(car_dir) * (float)(ddeltatime * car_speed*0.001);
+		if (inputHandler.GetKeycodeState(GLFW_KEY_1) & PRESSED)
+			chosen_cam = 1;
+		if (inputHandler.GetKeycodeState(GLFW_KEY_2) & PRESSED) {
+			chosen_cam = 2;
+			glm::mat4 carT = car.get_transform();
+			mCamera.mWorld.LookAt(glm::vec3(carT[3][0], carT[3][1], carT[3][2]), glm::vec3(0, 1, 0));
+		}
 
 		//
 		// update car pos
@@ -252,6 +274,17 @@ edaf80::Assignment5::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+		//
+		// Set camera position
+		//
+		if (chosen_cam == 2) {
+			glm::mat4 new_cam_pos = world.get_transform() * car.get_transform() * car_cam.get_transform();
+			mCamera.mWorld.SetTranslate(glm::vec3(new_cam_pos[3][0] / new_cam_pos[3][3],
+				new_cam_pos[3][1] / new_cam_pos[3][3],
+				new_cam_pos[3][2] / new_cam_pos[3][3]));
+			mCamera.mWorld.RotateY(theta);
+			}
+
 		if (!shader_reload_failed) {
 			//
 			// Todo: Render properly, not explicit for all nodes
@@ -264,8 +297,7 @@ edaf80::Assignment5::run()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//
-		// Todo: If you want a custom ImGUI window, you can set it up
-		//       here
+		// Set up ImGui window
 		//
 		bool const opened = ImGui::Begin("Frames per second", nullptr, ImVec2(400, 100), -1.0f, 0);
 		if (opened) {
