@@ -60,7 +60,7 @@ edaf80::Assignment3::run()
 	// Load the sphere geometry
 	//auto sphere = parametric_shapes::createSphere(4u, 60u, 1.0f);
 	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("car.obj");
-	bonobo::mesh_data const& teapot_shape = objects.front();
+	bonobo::mesh_data const& teapot_shape = objects[1];
 	if (teapot_shape.vao == 0u) {
 		LogError("Failed to retrieve the teapot");
 		return;
@@ -182,9 +182,10 @@ edaf80::Assignment3::run()
 	//teapot.scale(glm::vec3(100.0,100.0,100.0));
 	teapot.set_geometry(teapot_shape);
 	teapot.set_program(&fallback_shader, set_uniforms);
+//	glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, size, pixels);
 
 	// texture
-	GLuint const image_texture = bonobo::loadTexture2D("TerrainRock_0016_Color.png");
+	GLuint const image_texture = bonobo::loadTexture2D("car_out_d.png");
 	teapot.add_texture("diffuse_texture", image_texture, GL_TEXTURE_2D);
 
 	// normal mapping

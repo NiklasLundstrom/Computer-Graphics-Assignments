@@ -115,8 +115,8 @@ edaf80::Assignment5::run()
 	}
 
 	GLuint phong_shader = 0u;
-	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong.vert" },
-											   { ShaderType::fragment, "EDAF80/phong.frag" } },
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong_w_texture.vert" },
+											   { ShaderType::fragment, "EDAF80/phong_w_texture.frag" } },
 		phong_shader);
 	if (phong_shader == 0u) {
 		LogError("Failed to load phong shader");
@@ -145,7 +145,7 @@ edaf80::Assignment5::run()
 	//
 	// load height map
 	//
-	std::string landscape_filename = "test_orient.png";
+	std::string landscape_filename = "test_orient2.png";
 	u32 width_landscape, height_landscape;
 	auto const landscape_path = config::resources_path("textures/" + landscape_filename);
 	std::vector<unsigned char> landscape;
@@ -193,14 +193,16 @@ edaf80::Assignment5::run()
 	//
 
 		// teapot
-	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("utah-teapot.obj");
+	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("car.obj");
 	if (objects.empty()) {
 		LogError("Failed to load the box geometry: exiting.");
 		Log::View::Destroy();
 		Log::Destroy();
 		return;
 	}
-	bonobo::mesh_data const& teapot = objects.front();
+	bonobo::mesh_data const& car_exterior = objects[0];
+	bonobo::mesh_data const& car_interior = objects[1];
+	bonobo::mesh_data const& car_glass = objects[2];
 
 		// quad
 	auto const quad = parametric_shapes::createQuad(500, 500);
@@ -217,8 +219,12 @@ edaf80::Assignment5::run()
 			world.add_child(&car);
 			Node car_rot = Node();
 				car.add_child(&car_rot);
-				Node car_geometry = Node();
-					car_rot.add_child(&car_geometry);
+				Node car_ext = Node();
+					car_rot.add_child(&car_ext);
+				Node car_int = Node();
+					car_rot.add_child(&car_int);
+				Node car_gl = Node();
+					car_rot.add_child(&car_gl);
 				Node car_cam = Node();
 					car_rot.add_child(&car_cam);
 			Node world_cam = Node();
@@ -243,13 +249,34 @@ edaf80::Assignment5::run()
 	float car_rot_speed = glm::pi<float>();
 
 	// car geometry
-	car_geometry.set_geometry(teapot);
-	car_geometry.set_scaling(glm::vec3(1, 1, 1));
-	car_geometry.set_rotation_y(glm::half_pi<float>());
-	car_geometry.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
-	car_geometry.set_program(&car_shader, phong_set_uniforms);
+	// car exterior
+	car_ext.set_geometry(car_exterior);
+	car_ext.set_scaling(glm::vec3(10, 10, 10));
+	car_ext.set_rotation_y(glm::pi<float>());
+	car_ext.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
+	car_ext.set_program(&phong_shader, phong_set_uniforms);
+	GLuint const car_ext_texture = bonobo::loadTexture2D("car_out_d.png");
+	car_ext.add_texture("diffuse_texture", car_ext_texture, GL_TEXTURE_2D);
+
+	// car interior
+	car_int.set_geometry(car_interior);
+	car_int.set_scaling(glm::vec3(10, 10, 10));
+	car_int.set_rotation_y(glm::pi<float>());
+	car_int.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
+	car_int.set_program(&phong_shader, phong_set_uniforms);
+	GLuint const car_in_texture = bonobo::loadTexture2D("car_in_d.png");
+	car_int.add_texture("diffuse_texture", car_in_texture, GL_TEXTURE_2D);
+
+	// car glass
+	car_gl.set_geometry(car_glass);
+	car_gl.set_scaling(glm::vec3(10, 10, 10));
+	car_gl.set_rotation_y(glm::pi<float>());
+	car_gl.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
+	car_gl.set_program(&phong_shader, phong_set_uniforms);
+	car_gl.add_texture("diffuse_texture", car_ext_texture, GL_TEXTURE_2D);
+
+
 	GLuint const height_map = bonobo::loadTexture2D(landscape_filename);
-	//car_geometry.add_texture("height_map", height_map, GL_TEXTURE_2D);
 	
 	// car camera ("first person"), chosen camera: 2
 	car_cam.set_translation(glm::vec3(0, 50, 150));
@@ -431,7 +458,9 @@ edaf80::Assignment5::run()
 		//
 		if (!shader_reload_failed) {
 			
-			car_geometry.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_geometry.get_transform());
+			car_ext.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_ext.get_transform());
+			car_int.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_int.get_transform());
+			car_gl.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_gl.get_transform());
 			ground.render(mCamera.GetWorldToClipMatrix(), ground.get_transform());
 
 		}
