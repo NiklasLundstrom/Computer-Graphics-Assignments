@@ -44,39 +44,44 @@ edaf80::Assignment5::~Assignment5()
 	Log::View::Destroy();
 }
 
-unsigned char terrainHeight(std::vector<unsigned char> image, float x, float z, int width, int height, float scale) {
-	if (x > scale || x < -scale || z > scale || z < -scale)
-		return 0u;
-	if (x < -50)
-		int bp = 0;
+float terrainHeight(std::vector<unsigned char> image, float x, float z, int width, int height, float scale) {
+	//if (x > scale || x < -scale || z > scale || z < -scale)
+	//	return 0u;
+	//if (x < -50)
+	//	int bp = 0;
 	// TODO interpolate between pixels
-	//int u = ((-x / scale) + 1)*(width - 1) / 2;
-	//int v = ((z / scale) + 1)*(height - 1) / 2;
 
-	float delta = 4.0f;
+	/*float delta = 4.0f;
 	int u_1 = glm::clamp( ((-(x-delta) / scale) + 1)/2, 0.0f, 1.0f )*(width - 1);
 	int u = ((-(x) / scale) + 1)*(width - 1) / 2;
 	int u1 = glm::clamp( ((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
 	int v_1 = glm::clamp( (((z-delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 	int v = ((z / scale) + 1)*(height - 1) / 2;
-	int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
+	int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);*/
 
-	int offset = 100;
-	int p_1_1 = image.at(height*u_1 + v_1);
-	int p_1_0 = image.at(height*u_1 + v);
-	int p_11 = image.at(height*u_1 + v1);
-	int p_0_1 = image.at(height*u + v_1);
-	int p_0_0 = image.at(height*u + v);
-	int p_01 = image.at(height*u + v1);
-	int p1_1 = image.at(height*u1 + v_1);
-	int p1_0 = image.at(height*u1 + v);
-	int p11 = image.at(height*u1 + v1);
+	int v = ((x / scale) + 1)*(height - 1) / 2;
+	int u = ((z / scale) + 1)*(width - 1) / 2;
 
-	int mean = (p_1_1 + p_1_0 + p_11 +
-				p_0_1 + p_0_0 + p_01 +
-				p1_1 + p1_0 + p11) / 9;
+	int p_0_0 = image.at(u + v*height);
+
+	//int offset = 100;
+	//int p_1_1 = image.at(height*u_1 + v_1);
+	//int p_1_0 = image.at(height*u_1 + v);
+	//int p_11 = image.at(height*u_1 + v1);
+	//int p_0_1 = image.at(height*u + v_1);
+	//int p_0_0 = image.at(height*u + v);
+	//int p_01 = image.at(height*u + v1);
+	//int p1_1 = image.at(height*u1 + v_1);
+	//int p1_0 = image.at(height*u1 + v);
+	//int p11 = image.at(height*u1 + v1);
+
+
+
+	//int mean = (p_1_1 + p_1_0 + p_11 +
+	//			p_0_1 + p_0_0 + p_01 +
+	//			p1_1 + p1_0 + p11) / 9;
 	
-	return mean * offset / 255;// image.at(height*u + v)*offset / 255;
+	return ((float) p_0_0)/255.0f;// image.at(height*u + v)*offset / 255;
 }
 
 void
@@ -134,7 +139,7 @@ edaf80::Assignment5::run()
 	//
 	// load height map
 	//
-	std::string landscape = "landscape.png";
+	std::string landscape = "test_orient3.png";
 	u32 width, height;
 	auto const path = config::resources_path("textures/" + landscape);
 	std::vector<unsigned char> image;
@@ -142,13 +147,15 @@ edaf80::Assignment5::run()
 		LogWarning("Couldn't load or decode image file %s", path.c_str());
 		return;
 	}
-	float ground_scale = 300.0f;
-	printf("width: %d, height: %d\nsize: %d\n", width, height, image.size());
-	printf("0,0: %d\n", terrainHeight(image, 0, 0, width, height, ground_scale));
-	printf("s,0: %d\n", terrainHeight(image, ground_scale, 0, width, height, ground_scale));
-	printf("0,s: %d\n", terrainHeight(image, 0, ground_scale, width, height, ground_scale));
-	printf("s,s: %d\n", terrainHeight(image, ground_scale, ground_scale, width, height, ground_scale));
 
+	float ground_scale = 200.0f;
+	printf("width: %d, height: %d\nsize: %d\n", width, height, image.size());
+	printf("0,0: %f\n", terrainHeight(image, 0, 0, width, height, ground_scale));
+	printf("s,0: %f\n", terrainHeight(image, ground_scale, 0, width, height, ground_scale));
+	printf("0,s: %f\n", terrainHeight(image, 0, ground_scale, width, height, ground_scale));
+	printf("s-10,s-10: %f\n", terrainHeight(image, ground_scale-10, ground_scale-10, width, height, ground_scale));
+	printf("-s+10,s-10: %f\n", terrainHeight(image, -ground_scale+10, ground_scale-10, width, height, ground_scale));
+	printf("s-10,-s+10: %f\n", terrainHeight(image, ground_scale-10, -ground_scale+10, width, height, ground_scale));
 	//
 	// set up uniform variables
 	//
@@ -158,13 +165,14 @@ edaf80::Assignment5::run()
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
 	auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	auto shininess = 15.0f;
-	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess](GLuint program) {
+	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &ground_scale](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
 		glUniform3fv(glGetUniformLocation(program, "ambient"), 1, glm::value_ptr(ambient));
 		glUniform3fv(glGetUniformLocation(program, "diffuse"), 1, glm::value_ptr(diffuse));
 		glUniform3fv(glGetUniformLocation(program, "specular"), 1, glm::value_ptr(specular));
 		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
+		glUniform1f(glGetUniformLocation(program, "ground_scale"), ground_scale);
 	};
 	
 	//
@@ -211,8 +219,8 @@ edaf80::Assignment5::run()
 	//
 
 	// car
-	int ground_height =	terrainHeight(image, 0, 0, width, height, ground_scale);
-	glm::vec3 car_pos = glm::vec3(0, 0, 0); // TODO vary car_pos.y according to height map
+	float ground_height =	terrainHeight(image, 0, 0, width, height, ground_scale);
+	glm::vec3 car_pos = glm::vec3(0, ground_scale*ground_height, 0); // TODO vary car_pos.y according to height map
 	car.set_translation(car_pos);
 	float car_speed = 100.0;
 
@@ -222,7 +230,6 @@ edaf80::Assignment5::run()
 	float car_rot_speed = glm::pi<float>();
 
 	// car geometry
-	
 	car_geometry.set_geometry(teapot);
 	car_geometry.set_scaling(glm::vec3(1, 1, 1));
 	car_geometry.set_rotation_y(glm::half_pi<float>());
@@ -346,9 +353,13 @@ edaf80::Assignment5::run()
 		// update car pos
 		//
 		// TODO vary car.y according to height map
-		//car_pos.y = terrainHeight(image, car_pos.x, car_pos.z, width, height, ground_scale);
+		car_pos.y = terrainHeight(image, car_pos.x, car_pos.z, width, height, ground_scale)*ground_scale;
 		car.set_translation(car_pos);
 		car_rot.rotate_y(theta);
+
+		// print car pos
+		//printf("\033c");
+		//printf("node center:\n[%f, %f, %f]\n \n", car_pos.x, car_pos.y, car_pos.z);
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
@@ -383,6 +394,7 @@ edaf80::Assignment5::run()
 
 		// update value with current position
 		camera_position = mCamera.mWorld.GetTranslation();
+
 
 		//
 		// Todo: Render properly, not explicit for all nodes

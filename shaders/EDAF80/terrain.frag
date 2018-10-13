@@ -16,6 +16,6 @@ void main()
 	vec3 color = texture(height_map, fs_in.texcoord).rgb;
 	vec3 L = normalize(light_position - fs_in.vertex);
 	vec3 dif = vec3(1.0) * clamp(dot(normalize(fs_in.normal), L), 0.0, 1.0);
-	frag_color.rgb = dif;
+	frag_color.rgb = 0.5*fs_in.normal+0.5; //dif;
 	frag_color.a = 1.0;
 }

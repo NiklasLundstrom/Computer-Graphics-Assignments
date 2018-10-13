@@ -23,7 +23,7 @@ out VS_OUT {
 void main()
 {
   //vec3 vertex_new = vertex;
-  //vertex_new.y = texture(height_map, texcoord.xy).r;
+  //vertex_new.y = vertex.y + texture(height_map, texcoord.xy).r;
   vec3 worldVertex = (vertex_model_to_world*vec4(vertex,1.0)).xyz;
   vs_out.normal = (normal_model_to_world*vec4(normal,1.0)).xyz;
   vs_out.V = camera_position - worldVertex;
