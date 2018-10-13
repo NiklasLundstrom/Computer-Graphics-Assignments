@@ -81,14 +81,20 @@ unsigned char terrainHeight(std::vector<unsigned char> image, float x, float z, 
 
 void
 edaf80::Assignment5::run()
-{	//
+{
+	// Set scale of world
+	float ground_scale = 4000.0f;
+	float world_scale = ground_scale / 1000.0f;
+	//
 	// Set up the camera
 	//
 	mCamera.mWorld.SetTranslate(glm::vec3(100.0f, 200.0f, 200.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.25f;
+	mCamera.SetProjection(mCamera.GetFov(), mCamera.GetAspect(), 1.0f, 2000.0f*world_scale);
 
 	int chosen_cam = 1;
+
 	
 	//
 	// Create the shader programs
@@ -142,7 +148,6 @@ edaf80::Assignment5::run()
 		LogWarning("Couldn't load or decode image file %s", landscape_path.c_str());
 		return;
 	}
-	float ground_scale = 1000.0f;
 
 	//
 	// load road alpha
@@ -159,7 +164,7 @@ edaf80::Assignment5::run()
 	//
 	// set up uniform variables
 	//
-	auto light_position = glm::vec3(-100.0f, 200.0f, 30.0f);
+	auto light_position = glm::vec3(-100.0f, 200.0f, 30.0f)*world_scale;
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto ambient = glm::vec3(0.2f, 0.1f, 0.1f);
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
@@ -216,10 +221,10 @@ edaf80::Assignment5::run()
 	//
 	// set up nodes
 	//
-
+			//world.set_scaling(glm::vec3(0.01, 0.01, 0.01));
 	// car
 	int ground_height =	terrainHeight(landscape, 0, 0, width_landscape, height_landscape, ground_scale);
-	glm::vec3 car_pos = glm::vec3(4, 0, 0); // TODO vary car_pos.y according to height map
+	glm::vec3 car_pos = glm::vec3(4, 0, 0)*world_scale; // TODO vary car_pos.y according to height map
 	car.set_translation(car_pos);
 	float car_speed = 0.0f;
 
@@ -241,8 +246,8 @@ edaf80::Assignment5::run()
 	car_cam.set_translation(glm::vec3(0, 50, 150));
 
 	// world camera ("third person"), chosen camera: 1
-	world_cam.set_translation(glm::vec3(0, 50, 100));
-	float wcam_car_dist = 300.0;
+	world_cam.set_translation(glm::vec3(0, 50, 100)*world_scale);
+	float wcam_car_dist = 300.0*world_scale;
 	float wcam_height_angle = glm::pi<float>()/3;
 	float wcam_y_angle = 0.0;
 
@@ -338,9 +343,9 @@ edaf80::Assignment5::run()
 		}
 		if (chosen_cam == 1) {
 			if (inputHandler.GetKeycodeState(GLFW_KEY_W) & PRESSED)
-				wcam_car_dist = glm::clamp(wcam_car_dist - 5.0f, 50.0f, 600.0f);
+				wcam_car_dist = glm::clamp(wcam_car_dist - 5.0f*world_scale, 50.0f*world_scale, 600.0f*world_scale);
 			if (inputHandler.GetKeycodeState(GLFW_KEY_S) & PRESSED)
-				wcam_car_dist = glm::clamp(wcam_car_dist + 5.0f, 50.0f, 600.0f);
+				wcam_car_dist = glm::clamp(wcam_car_dist + 5.0f*world_scale, 50.0f*world_scale, 600.0f*world_scale);
 			if (inputHandler.GetKeycodeState(GLFW_KEY_A) & PRESSED)
 				wcam_y_angle -= 0.025f;
 			if (inputHandler.GetKeycodeState(GLFW_KEY_D) & PRESSED)
@@ -361,8 +366,9 @@ edaf80::Assignment5::run()
 		// outside road
 		float on_road = ((float)terrainHeight(road, car_pos.x, car_pos.z, width_road, height_road, ground_scale)) / 100.0f;
 		if (0.5 > on_road) {
-			car_speed = glm::sign(car_speed)
-				* glm::max(glm::abs(car_speed) - 500.0f*(float)ddeltatime*0.001f, 80.0f);
+			if (glm::abs(car_speed) > 4000.0f*(float)ddeltatime*0.001f) {
+				car_speed = glm::sign(car_speed) * (glm::abs(car_speed) - 500.0f*(float)ddeltatime*0.001f);
+			}
 		}
 		// move car_pos
 		car_pos += glm::normalize(car_dir) * (float)(ddeltatime * car_speed*0.001);
