@@ -47,11 +47,11 @@ void main()
   vec3 refractDir = refract(fs_in.V, normal_new, 1/1.33);
   vec3 reflectDir = normalize(reflect(-fs_in.V, normal_new));
   float facing = 1 - max(dot(fs_in.V, normal_new), 0);
-  vec3 color = mix(color_deep, color_shallow, facing); 
+  vec3 color = mix(color_deep, color_shallow, facing);
 
   float R0 = 0.02037;
   float fresnel = R0 + (1-R0)*pow(1-dot(fs_in.V, normal_new),5);
-  vec3 reflection = fresnel * texture(my_cube_map, reflectDir).rgb; 
+  vec3 reflection = fresnel * texture(my_cube_map, reflectDir).rgb;
   vec3 refraction = (1-fresnel)* texture(my_cube_map, refractDir).rgb;
 
   fColor.xyz = color + reflection + refraction;

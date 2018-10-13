@@ -59,7 +59,7 @@ edaf80::Assignment3::run()
 {
 	// Load the sphere geometry
 	//auto sphere = parametric_shapes::createSphere(4u, 60u, 1.0f);
-	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("utah-teapot.obj");
+	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("car.obj");
 	bonobo::mesh_data const& teapot_shape = objects.front();
 	if (teapot_shape.vao == 0u) {
 		LogError("Failed to retrieve the teapot");

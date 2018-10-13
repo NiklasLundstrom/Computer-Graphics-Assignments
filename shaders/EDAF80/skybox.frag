@@ -13,7 +13,7 @@ out vec4 fColor;
 void main()
 {
 	vec3 V = normalize(fs_in.vertex);
-	//vec3 N = normalize(fs_in.normal);
-	//vec3 R = reflect(-V, N);
-	fColor = texture(my_cube_map, V);
+	vec3 N = normalize(fs_in.normal);
+	vec3 R = reflect(-V, N);
+	fColor = texture(my_cube_map, R);
 }
