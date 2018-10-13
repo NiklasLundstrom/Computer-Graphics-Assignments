@@ -7,7 +7,7 @@ uniform float time;
 
 vec3 color_shallow = vec3(0.0, 0.5, 0.5);
 vec3 color_deep = vec3(0.0, 0.0, 0.1);
-vec2 texScale = vec2(8,4);
+vec2 texScale = vec2(0.8,0.4);
 vec2 bumpSpeed = 0.05*normalize(vec2(-0.05, 0.02));
 
 in VS_OUT {
@@ -35,10 +35,10 @@ void main()
 
   float normal_Alpha = 1;
   vec3 colorNormal0 = normal_Alpha * (2*texture(normal_texture,bumpCoord0).xyz - vec3(1.0,1.0,1.0)) + (1-normal_Alpha)*vec3(0.0,0.0,1.0);
-  vec3 colorNormal1 = normal_Alpha * (2*texture(normal_texture,bumpCoord1).xyz - vec3(1.0,1.0,1.0)) + (1-normal_Alpha)*vec3(0.0,0.0,1.0);
-  vec3 colorNormal2 = normal_Alpha * (2*texture(normal_texture,bumpCoord2).xyz - vec3(1.0,1.0,1.0)) + (1-normal_Alpha)*vec3(0.0,0.0,1.0);
-  vec3 bumpNormal = normalize(colorNormal0 + colorNormal1 + colorNormal2);
-  mat3 tangent_to_model = mat3(T, B, N);
+  //vec3 colorNormal1 = normal_Alpha * (2*texture(normal_texture,bumpCoord1).xyz - vec3(1.0,1.0,1.0)) + (1-normal_Alpha)*vec3(0.0,0.0,1.0);
+  //vec3 colorNormal2 = normal_Alpha * (2*texture(normal_texture,bumpCoord2).xyz - vec3(1.0,1.0,1.0)) + (1-normal_Alpha)*vec3(0.0,0.0,1.0);
+  vec3 bumpNormal = normalize(colorNormal0);// + colorNormal1 + colorNormal2);
+  mat3 tangent_to_model = mat3(B,T,N);
   bumpNormal = tangent_to_model * bumpNormal;
   bumpNormal = (normal_model_to_world * vec4(bumpNormal,0.0)).xyz;
   vec3 normal_new = normalize(bumpNormal);
