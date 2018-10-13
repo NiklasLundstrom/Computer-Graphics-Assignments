@@ -134,7 +134,7 @@ edaf80::Assignment5::run()
 	//
 	// load height map
 	//
-	std::string landscape = "landscape.png";
+	std::string landscape = "test_orient.png";
 	u32 width, height;
 	auto const path = config::resources_path("textures/" + landscape);
 	std::vector<unsigned char> image;
@@ -142,7 +142,7 @@ edaf80::Assignment5::run()
 		LogWarning("Couldn't load or decode image file %s", path.c_str());
 		return;
 	}
-	float ground_scale = 300.0f;
+	float ground_scale = 1000.0f;
 	printf("width: %d, height: %d\nsize: %d\n", width, height, image.size());
 	printf("0,0: %d\n", terrainHeight(image, 0, 0, width, height, ground_scale));
 	printf("s,0: %d\n", terrainHeight(image, ground_scale, 0, width, height, ground_scale));
@@ -214,7 +214,7 @@ edaf80::Assignment5::run()
 	int ground_height =	terrainHeight(image, 0, 0, width, height, ground_scale);
 	glm::vec3 car_pos = glm::vec3(0, 0, 0); // TODO vary car_pos.y according to height map
 	car.set_translation(car_pos);
-	float car_speed = 100.0;
+	float car_speed = 0.0f;
 
 
 	// car rotation
@@ -222,17 +222,16 @@ edaf80::Assignment5::run()
 	float car_rot_speed = glm::pi<float>();
 
 	// car geometry
-	
 	car_geometry.set_geometry(teapot);
 	car_geometry.set_scaling(glm::vec3(1, 1, 1));
 	car_geometry.set_rotation_y(glm::half_pi<float>());
 	car_geometry.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
 	car_geometry.set_program(&car_shader, phong_set_uniforms);
 	GLuint const height_map = bonobo::loadTexture2D(landscape);
-	car_geometry.add_texture("height_map", height_map, GL_TEXTURE_2D);
+	//car_geometry.add_texture("height_map", height_map, GL_TEXTURE_2D);
 	
 	// car camera ("first person"), chosen camera: 2
-	car_cam.set_translation(glm::vec3(0, 50, 100));
+	car_cam.set_translation(glm::vec3(0, 50, 150));
 
 	// world camera ("third person"), chosen camera: 1
 	world_cam.set_translation(glm::vec3(0, 50, 100));
@@ -246,6 +245,8 @@ edaf80::Assignment5::run()
 	ground.set_translation(glm::vec3(0, 0, 0));
 	ground.set_program(&terrain_shader, phong_set_uniforms);
 	ground.add_texture("height_map", height_map, GL_TEXTURE_2D);
+	GLuint const ground_diffuse = bonobo::loadTexture2D("checkers.png");
+	ground.add_texture("diffuse_tex", ground_diffuse, GL_TEXTURE_2D);
 
 
 	glEnable(GL_DEPTH_TEST);
@@ -262,7 +263,7 @@ edaf80::Assignment5::run()
 	double nowTime, lastTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
 
-	bool show_logs = true;
+	bool show_logs = false;
 	bool show_gui = true;
 	bool shader_reload_failed = false;
 
@@ -301,7 +302,6 @@ edaf80::Assignment5::run()
 		//
 		// Inputs, keyboard etc.
 		//
-		//handleInput();
 		glm::mat4 rot = glm::mat4(1.0f);
 		float theta = 0.0;
 		if (inputHandler.GetKeycodeState(GLFW_KEY_RIGHT) & PRESSED) {
@@ -317,9 +317,9 @@ edaf80::Assignment5::run()
 			car_dir = glm::normalize(glm::vec3(car_dir.x, car_dir.y, car_dir.z));
 		}
 		if (inputHandler.GetKeycodeState(GLFW_KEY_UP) & PRESSED)
-			car_pos += glm::normalize(car_dir) * (float) (ddeltatime * car_speed*0.001);
+			car_speed = glm::clamp(car_speed + 400.0f*(float)ddeltatime*0.001f, -800.0f, 800.0f);
 		if (inputHandler.GetKeycodeState(GLFW_KEY_DOWN) & PRESSED)
-			car_pos -= glm::normalize(car_dir) * (float)(ddeltatime * car_speed*0.001);
+			car_speed = glm::clamp(car_speed - 400.0f*(float)ddeltatime*0.001f, -800.0f, 800.0f);
 		if (inputHandler.GetKeycodeState(GLFW_KEY_1) & PRESSED)
 			chosen_cam = 1;
 		if (inputHandler.GetKeycodeState(GLFW_KEY_2) & PRESSED) {
@@ -346,7 +346,13 @@ edaf80::Assignment5::run()
 		// update car pos
 		//
 		// TODO vary car.y according to height map
-		//car_pos.y = terrainHeight(image, car_pos.x, car_pos.z, width, height, ground_scale);
+		// friction
+		car_speed = glm::sign(car_speed)
+					* glm::max(glm::abs(car_speed) - 200.0f*(float)ddeltatime*0.001f, 0.0f);
+		// move car_pos
+		car_pos += glm::normalize(car_dir) * (float)(ddeltatime * car_speed*0.001);
+		car_pos.y = terrainHeight(image, car_pos.x, car_pos.z, width, height, ground_scale);
+		// update car
 		car.set_translation(car_pos);
 		car_rot.rotate_y(theta);
 
@@ -378,7 +384,8 @@ edaf80::Assignment5::run()
 			mCamera.mWorld.SetTranslate(glm::vec3(new_cam_pos[3][0] / new_cam_pos[3][3],
 				new_cam_pos[3][1] / new_cam_pos[3][3],
 				new_cam_pos[3][2] / new_cam_pos[3][3]));
-			mCamera.mWorld.RotateY(theta);
+			//mCamera.mWorld.RotateY(theta);
+			mCamera.mWorld.LookAt(car_pos + glm::vec3(0,40,0), glm::vec3(0, 1, 0));
 			}
 
 		// update value with current position
