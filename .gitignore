@@ -337,3 +337,4 @@ CMake/
 CMakeLists.txt
 *.cmake
 *.swp
+*.png

@@ -51,35 +51,38 @@ float terrainHeight(std::vector<unsigned char> image, float x, float z, int widt
 	//	int bp = 0;
 	 //TODO interpolate between pixels
 
-	float delta = 4.0f;
-	int u_1 = glm::clamp( ((-(x-delta) / scale) + 1)/2, 0.0f, 1.0f )*(width - 1);
-	int u = ((-(x) / scale) + 1)*(width - 1) / 2;
-	int u1 = glm::clamp( ((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
-	int v_1 = glm::clamp( (((z-delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
-	int v = ((z / scale) + 1)*(height - 1) / 2;
-	int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
+	//float delta = 4.0f;
+	//int u_1 = glm::clamp( ((-(x-delta) / scale) + 1)/2, 0.0f, 1.0f )*(width - 1);
+	//int u = ((-(x) / scale) + 1)*(width - 1) / 2;
+	//int u1 = glm::clamp( ((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
+	//int v_1 = glm::clamp( (((z-delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
+	//int v = ((z / scale) + 1)*(height - 1) / 2;
+	//int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 
 	//int v = ((x / scale) + 1)*(height - 1) / 2;
 	//int u = ((z / scale) + 1)*(width - 1) / 2;
 
 	//int p_0_0 = image.at(u + v*height);
+	float v = (z/scale + 1)/2; 
+	float u = (-x/scale + 1)/2;
+	int p_0_0 = image.at((height - 1)*u*width + (width - 1)*v);
+	//printf("\033c");
+	//printf("index:, %f, v:, %f, u:, %f, p_0_0:, %d", (height - 1)*u*width + (width - 1)*v, v, u, p_0_0);
 
-	int offset = 100;
-	int p_1_1 = image.at(height*u_1 + v_1);
-	int p_1_0 = image.at(height*u_1 + v);
-	int p_11 = image.at(height*u_1 + v1);
-	int p_0_1 = image.at(height*u + v_1);
-	int p_0_0 = image.at(height*u + v);
-	int p_01 = image.at(height*u + v1);
-	int p1_1 = image.at(height*u1 + v_1);
-	int p1_0 = image.at(height*u1 + v);
-	int p11 = image.at(height*u1 + v1);
+	//int offset = 100;
+	//int p_1_1 = image.at(height*u_1 + v_1);
+	//int p_1_0 = image.at(height*u_1 + v);
+	//int p_11 = image.at(height*u_1 + v1);
+	//int p_0_1 = image.at(height*u + v_1);
+	//int p_0_0 = image.at(height*u + v);
+	//int p_01 = image.at(height*u + v1);
+	//int p1_1 = image.at(height*u1 + v_1);
+	//int p1_0 = image.at(height*u1 + v);
+	//int p11 = image.at(height*u1 + v1);
 
-
-
-	int mean = (p_1_1 + p_1_0 + p_11 +
-				p_0_1 + p_0_0 + p_01 +
-				p1_1 + p1_0 + p11) / 9;
+	//int mean = (p_1_1 + p_1_0 + p_11 +
+	//			p_0_1 + p_0_0 + p_01 +
+	//			p1_1 + p1_0 + p11) / 9;
 	
 	return ((float) p_0_0)/255.0f;// image.at(height*u + v)*offset / 255;
 }
@@ -88,7 +91,7 @@ void
 edaf80::Assignment5::run()
 {
 	// Set scale of world
-	float ground_scale = 1000.0f;
+	float ground_scale = 100.0f;
 	float world_scale = ground_scale / 1000.0f;
 	//
 	// Set up the camera
@@ -145,13 +148,17 @@ edaf80::Assignment5::run()
 	//
 	// load height map
 	//
-	std::string landscape_filename = "test_orient2.png";
+	std::string landscape_filename = "test_orient5.png";
 	u32 width_landscape, height_landscape;
 	auto const landscape_path = config::resources_path("textures/" + landscape_filename);
 	std::vector<unsigned char> landscape;
 	if (lodepng::decode(landscape, width_landscape, height_landscape, landscape_path, LCT_GREY) != 0) {
 		LogWarning("Couldn't load or decode image file %s", landscape_path.c_str());
 		return;
+	}
+	for (int i = 0; i < landscape.size(); i++) {
+		printf("i: %d, val: %d\n:", i, landscape[i]);
+		system("PAUSE");
 	}
 
 	//
@@ -166,7 +173,7 @@ edaf80::Assignment5::run()
 		return;
 	}
 
-	//printf("width: %d, height: %d\nsize: %d\n", width, height, image.size());
+	printf("width: %d, height: %d\nsize: %d\n", width_landscape, height_landscape, landscape.size());
 	//printf("0,0: %f\n", terrainHeight(image, 0, 0, width, height, ground_scale));
 
 	//
@@ -251,7 +258,7 @@ edaf80::Assignment5::run()
 	// car geometry
 	// car exterior
 	car_ext.set_geometry(car_exterior);
-	car_ext.set_scaling(glm::vec3(10, 10, 10));
+	car_ext.set_scaling(glm::vec3(1, 1, 1));
 	car_ext.set_rotation_y(glm::pi<float>());
 	car_ext.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
 	car_ext.set_program(&phong_shader, phong_set_uniforms);
@@ -260,7 +267,7 @@ edaf80::Assignment5::run()
 
 	// car interior
 	car_int.set_geometry(car_interior);
-	car_int.set_scaling(glm::vec3(10, 10, 10));
+	car_int.set_scaling(glm::vec3(1, 1, 1));
 	car_int.set_rotation_y(glm::pi<float>());
 	car_int.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
 	car_int.set_program(&phong_shader, phong_set_uniforms);
@@ -269,7 +276,7 @@ edaf80::Assignment5::run()
 
 	// car glass
 	car_gl.set_geometry(car_glass);
-	car_gl.set_scaling(glm::vec3(10, 10, 10));
+	car_gl.set_scaling(glm::vec3(1, 1, 1));
 	car_gl.set_rotation_y(glm::pi<float>());
 	car_gl.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
 	car_gl.set_program(&phong_shader, phong_set_uniforms);
@@ -416,6 +423,7 @@ edaf80::Assignment5::run()
 		// print car pos
 		//printf("\033c");
 		//printf("node center:\n[%f, %f, %f]\n \n", car_pos.x, car_pos.y, car_pos.z);
+		//printf("")
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
