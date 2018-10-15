@@ -21,6 +21,8 @@
 
 #include <cstdlib>
 #include <stdexcept>
+using namespace std;
+
 
 edaf80::Assignment5::Assignment5() :
 	mCamera(0.5f * glm::half_pi<float>(),
@@ -51,37 +53,71 @@ float terrainHeight(std::vector<unsigned char> image, float x, float z, int widt
 	//	int bp = 0;
 	 //TODO interpolate between pixels
 
-	float delta = 4.0f;
-	int u_1 = glm::clamp( ((-(x-delta) / scale) + 1)/2, 0.0f, 1.0f )*(width - 1);
-	int u = ((-(x) / scale) + 1)*(width - 1) / 2;
-	int u1 = glm::clamp( ((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
-	int v_1 = glm::clamp( (((z-delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
-	int v = ((z / scale) + 1)*(height - 1) / 2;
-	int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
+	//float delta = 4.0f;
+	//int u_1 = glm::clamp( ((-(x-delta) / scale) + 1)/2, 0.0f, 1.0f )*(width - 1);
+	int u = ((-(x) / scale) + 1) *(height - 1) / 2;
+	//int u1 = glm::clamp( ((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
+	//int v_1 = glm::clamp( (((z-delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
+	int v = ((z / scale) + 1)*(width - 1) / 2;
+	//int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 
 	//int v = ((x / scale) + 1)*(height - 1) / 2;
 	//int u = ((z / scale) + 1)*(width - 1) / 2;
 
 	//int p_0_0 = image.at(u + v*height);
+	//float v = (z/scale + 1)/2; 
+	//float u = (-x/scale + 1)/2;
+	//int p_0_0 = image.at((height - 1)*u*width + (width - 1)*v);
+	//printf("\033c");
+	//printf("index:, %f, v:, %f, u:, %f, p_0_0:, %d", (height - 1)*u*width + (width - 1)*v, v, u, p_0_0);
 
-	int offset = 100;
-	int p_1_1 = image.at(height*u_1 + v_1);
-	int p_1_0 = image.at(height*u_1 + v);
-	int p_11 = image.at(height*u_1 + v1);
-	int p_0_1 = image.at(height*u + v_1);
-	int p_0_0 = image.at(height*u + v);
-	int p_01 = image.at(height*u + v1);
-	int p1_1 = image.at(height*u1 + v_1);
-	int p1_0 = image.at(height*u1 + v);
-	int p11 = image.at(height*u1 + v1);
+	//int offset = 100;
+	//int p_1_1 = image.at(height*u_1 + v_1);
+	//int p_1_0 = image.at(height*u_1 + v);
+	//int p_11 = image.at(height*u_1 + v1);
+	//int p_0_1 = image.at(height*u + v_1);
+	int p_0_0 = image.at(u*width + v);
+	//int p_01 = image.at(height*u + v1);
+	//int p1_1 = image.at(height*u1 + v_1);
+	//int p1_0 = image.at(height*u1 + v);
+	//int p11 = image.at(height*u1 + v1);
 
-
-
-	int mean = (p_1_1 + p_1_0 + p_11 +
-				p_0_1 + p_0_0 + p_01 +
-				p1_1 + p1_0 + p11) / 9;
+	//int mean = (p_1_1 + p_1_0 + p_11 +
+	//			p_0_1 + p_0_0 + p_01 +
+	//			p1_1 + p1_0 + p11) / 9;
 	
-	return ((float) mean)/255.0f;// image.at(height*u + v)*offset / 255;
+	return ((float) p_0_0)/255.0f;// image.at(height*u + v)*offset / 255;
+}
+
+glm::vec3 normalDir(std::vector<glm::vec3>* imagepntr, float x, float z, int width, int height, float scale) {
+	if (x > scale || x < -scale || z > scale || z < -scale) {
+		return glm::vec3(0.0f,0.0f,0.0f);
+	}
+
+	int u = ((-(x) / scale) + 1) *(height - 1) / 2;
+	int v = ((z / scale) + 1)*(width - 1) / 2;
+
+	//auto vec = imagepntr->at[u*width + v];
+	//int g = imagepntr->at[u*width + v];
+	//int b = imagepntr->at[u*width + v];
+	//
+	return imagepntr->at(u*width + v);//glm::vec3(((float)vec.x) / 255.0f, ((float)vec.y) / 255.0f, ((float)vec.z) / 255.0f);
+}
+
+glm::vec3 normalDirTest(std::vector<unsigned char> image, float x, float z, int width, int height, float scale) {
+	if (x > scale || x < -scale || z > scale || z < -scale) {
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	int u = ((-(x) / scale) + 1) *(height - 1) / 2;
+	int v = ((z / scale) + 1)*(width - 1) / 2;
+
+	int r = image.at(u*width + v);
+	int g = image.at(u*width + v+1);
+	int b = image.at(u*width + v+2);
+
+	return glm::vec3(((float)r) / 255.0f, ((float)g) / 255.0f, ((float)b) / 255.0f);
+
 }
 
 void
@@ -98,21 +134,13 @@ edaf80::Assignment5::run()
 	mCamera.mMovementSpeed = 0.25f;
 	mCamera.SetProjection(mCamera.GetFov(), mCamera.GetAspect(), 1.0f, 700.0f*world_scale);
 
-	int chosen_cam = 1;
+	int chosen_cam = 2;
 
 	
 	//
 	// Create the shader programs
 	//
 	ShaderProgramManager program_manager;
-	GLuint fallback_shader = 0u;
-	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/fallback.vert" },
-	                                           { ShaderType::fragment, "EDAF80/fallback.frag" } },
-	                                         fallback_shader);
-	if (fallback_shader == 0u) {
-		LogError("Failed to load fallback shader");
-		return;
-	}
 
 	GLuint phong_shader = 0u;
 	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong.vert" },
@@ -136,6 +164,14 @@ edaf80::Assignment5::run()
 		car_shader);
 	if (car_shader == 0u) {
 		LogError("Failed to load car shader");
+	}
+
+	GLuint car_window_shader = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/car_window.vert" },
+											   { ShaderType::fragment, "EDAF80/car_window.frag" } },
+		car_window_shader);
+	if (car_window_shader == 0u) {
+		LogError("Failed to load car window shader");
 	}
 	
 	//
@@ -166,8 +202,38 @@ edaf80::Assignment5::run()
 		return;
 	}
 
-	//printf("width: %d, height: %d\nsize: %d\n", width, height, image.size());
-	//printf("0,0: %f\n", terrainHeight(image, 0, 0, width, height, ground_scale));
+	//
+	// load normal map
+	//
+	std::string normal_filename = "terrain/terrain_normal.png";
+	u32 width_normal, height_normal;
+	auto const normal_path = config::resources_path("textures/" + normal_filename);
+	std::vector<unsigned char> normal;
+	if (lodepng::decode(normal, width_normal, height_normal, normal_path, LCT_RGB) != 0) {
+		LogWarning("Couldn't load or decode image file %s", normal_path.c_str());
+		return;
+	}
+
+	// convert normal vector to vector where each element is an RGB vector
+	int rows = width_normal * height_normal;
+	int cols = 3;
+	int tracker = 0;
+	std::vector< glm::vec3 > normalVec(rows, glm::vec3(cols));
+	for (int i = 0; i < width_normal * height_normal; i++) {
+		normalVec[i][0] = normal[tracker]; 
+		normalVec[i][1] = normal[tracker++];
+		normalVec[i][2] = normal[tracker++];
+		tracker++;
+		/*printf("v[i][0]: %f, v[i][1]: %f, v[i][2]: %f, tracker: %d\n", v[i][0], v[i][1], v[i][2], tracker);
+		system("PAUSE");*/
+	}
+
+
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+	//printf("width: %d, height: %d\nsize: %d\n", width_normal, height_normal, normal.size());
+
+	//glm::vec3 vec = normalDir(v, 3900,3900, width_normal, height_normal, ground_scale);
+	//printf("vec[0]: %f, vec[1]: %f, vec[2]: %f", vec[0], vec[1], vec[2]);
 
 	//
 	// set up uniform variables
@@ -178,7 +244,7 @@ edaf80::Assignment5::run()
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
 	auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	auto shininess = 15.0f;
-	auto y_scale = 0.5f;
+	auto y_scale = 0.33f;
 	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &ground_scale, &y_scale](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
@@ -194,7 +260,7 @@ edaf80::Assignment5::run()
 	// Load the geometries
 	//
 
-		// teapot
+	// car
 	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("car.obj");
 	if (objects.empty()) {
 		LogError("Failed to load the box geometry: exiting.");
@@ -206,8 +272,9 @@ edaf80::Assignment5::run()
 	bonobo::mesh_data const& car_interior = objects[1];
 	bonobo::mesh_data const& car_glass = objects[2];
 
-		// quad
+	// quad
 	auto const quad = parametric_shapes::createQuad(800, 800);
+
 	if (quad.vao == 0u) {
 		LogError("Failed to load quad");
 	}
@@ -260,12 +327,13 @@ edaf80::Assignment5::run()
 	glm::vec3 car_dir = glm::vec3(0, 0, -1);
 	float car_rot_speed = glm::pi<float>();
 
+
 	// car geometry
 	// car exterior
 	car_ext.set_geometry(car_exterior);
 	car_ext.set_scaling(glm::vec3(10, 10, 10));
 	car_ext.set_rotation_y(glm::pi<float>());
-	car_ext.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
+	car_ext.set_translation(glm::vec3(0, 2, 0));
 	car_ext.set_program(&car_shader, phong_set_uniforms);
 	GLuint const car_ext_texture = bonobo::loadTexture2D("car_out_d.png");
 	car_ext.add_texture("diffuse_texture", car_ext_texture, GL_TEXTURE_2D);
@@ -274,7 +342,7 @@ edaf80::Assignment5::run()
 	car_int.set_geometry(car_interior);
 	car_int.set_scaling(glm::vec3(10, 10, 10));
 	car_int.set_rotation_y(glm::pi<float>());
-	car_int.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
+	car_int.set_translation(glm::vec3(0, 2, 0)); 
 	car_int.set_program(&car_shader, phong_set_uniforms);
 	GLuint const car_in_texture = bonobo::loadTexture2D("car_in_d.png");
 	car_int.add_texture("diffuse_texture", car_in_texture, GL_TEXTURE_2D);
@@ -283,8 +351,8 @@ edaf80::Assignment5::run()
 	car_gl.set_geometry(car_glass);
 	car_gl.set_scaling(glm::vec3(10, 10, 10));
 	car_gl.set_rotation_y(glm::pi<float>());
-	car_gl.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
-	car_gl.set_program(&car_shader, phong_set_uniforms);
+	car_gl.set_translation(glm::vec3(0, 2, 0)); 
+	car_gl.set_program(&car_window_shader, phong_set_uniforms);
 	car_gl.add_texture("diffuse_texture", car_ext_texture, GL_TEXTURE_2D);
 
 
@@ -328,7 +396,10 @@ edaf80::Assignment5::run()
 	glEnable(GL_CULL_FACE);
 	//glCullFace(GL_FRONT);
 	glCullFace(GL_BACK);
-
+	//glCullFace(GL_BACK);
+	glDisable(GL_CULL_FACE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 
 	f64 ddeltatime;
 	size_t fpsSamples = 0;
@@ -420,7 +491,7 @@ edaf80::Assignment5::run()
 		//
 		// update car pos
 		//
-		// TODO vary car.y according to height map
+		// 
 		// friction
 		car_speed = glm::sign(car_speed)
 			* glm::max(glm::abs(car_speed) - 200.0f*(float)ddeltatime*0.001f, 0.0f);
@@ -446,9 +517,11 @@ edaf80::Assignment5::run()
 			finished_race = true;
 			finishTime = nowTime;
 		}
+
 		// print car pos
 		//printf("\033c");
 		//printf("node center:\n[%f, %f, %f]\n \n", car_pos.x, car_pos.y, car_pos.z);
+		//printf("")
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
@@ -493,7 +566,7 @@ edaf80::Assignment5::run()
 			
 			car_ext.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_ext.get_transform());
 			car_int.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_int.get_transform());
-			car_gl.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_gl.get_transform());
+			car_gl.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform()  * car_gl.get_transform());
 			ground.render(mCamera.GetWorldToClipMatrix(), ground.get_transform());
 			goal_sphere.render(mCamera.GetWorldToClipMatrix(), goal_sphere.get_transform());
 		}
