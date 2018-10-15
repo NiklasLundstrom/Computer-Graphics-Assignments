@@ -26,6 +26,6 @@ void main()
   vec3 diff = texture(diffuse_texture, fs_in.texcoord).xyz*max(dot(N,L),0.0);
   vec3 spec = specular*pow(max(dot(R,V),0.0), shininess);
   vec3 amb = ambient * texture(diffuse_texture, fs_in.texcoord).xyz;
-  fColor.xyz = amb + diff + spec;
-  fColor.w = 1.0;
+  fColor.xyz = ambient + diff; // + specular;
+  fColor.w = 0.7;
  }
