@@ -81,14 +81,14 @@ float terrainHeight(std::vector<unsigned char> image, float x, float z, int widt
 				p_0_1 + p_0_0 + p_01 +
 				p1_1 + p1_0 + p11) / 9;
 	
-	return ((float) p_0_0)/255.0f;// image.at(height*u + v)*offset / 255;
+	return ((float) mean)/255.0f;// image.at(height*u + v)*offset / 255;
 }
 
 void
 edaf80::Assignment5::run()
 {
 	// Set scale of world
-	float ground_scale = 1000.0f;
+	float ground_scale = 4000.0f;
 	float world_scale = ground_scale / 1000.0f;
 	//
 	// Set up the camera
@@ -96,7 +96,7 @@ edaf80::Assignment5::run()
 	mCamera.mWorld.SetTranslate(glm::vec3(100.0f, 200.0f, 200.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.25f;
-	mCamera.SetProjection(mCamera.GetFov(), mCamera.GetAspect(), 1.0f, 2000.0f*world_scale);
+	mCamera.SetProjection(mCamera.GetFov(), mCamera.GetAspect(), 1.0f, 700.0f*world_scale);
 
 	int chosen_cam = 1;
 
@@ -115,8 +115,8 @@ edaf80::Assignment5::run()
 	}
 
 	GLuint phong_shader = 0u;
-	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong_w_texture.vert" },
-											   { ShaderType::fragment, "EDAF80/phong_w_texture.frag" } },
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/phong.vert" },
+											   { ShaderType::fragment, "EDAF80/phong.frag" } },
 		phong_shader);
 	if (phong_shader == 0u) {
 		LogError("Failed to load phong shader");
@@ -145,7 +145,7 @@ edaf80::Assignment5::run()
 	//
 	// load height map
 	//
-	std::string landscape_filename = "test_orient2.png";
+	std::string landscape_filename = "terrain/terrain_heightmap.png";
 	u32 width_landscape, height_landscape;
 	auto const landscape_path = config::resources_path("textures/" + landscape_filename);
 	std::vector<unsigned char> landscape;
@@ -157,7 +157,7 @@ edaf80::Assignment5::run()
 	//
 	// load road alpha
 	//
-	std::string road_filename = "road_alpha_2.png";
+	std::string road_filename = "terrain/road_alpha.png";
 	u32 width_road, height_road;
 	auto const road_path = config::resources_path("textures/" + road_filename);
 	std::vector<unsigned char> road;
@@ -172,13 +172,14 @@ edaf80::Assignment5::run()
 	//
 	// set up uniform variables
 	//
-	auto light_position = glm::vec3(-100.0f, 200.0f, 30.0f)*world_scale;
+	auto light_position = glm::vec3(1000.0f, 1000.0f, 1000.0f)*world_scale;
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto ambient = glm::vec3(0.2f, 0.1f, 0.1f);
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
 	auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	auto shininess = 15.0f;
-	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &ground_scale](GLuint program) {
+	auto y_scale = 0.5f;
+	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &ground_scale, &y_scale](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
 		glUniform3fv(glGetUniformLocation(program, "ambient"), 1, glm::value_ptr(ambient));
@@ -186,6 +187,7 @@ edaf80::Assignment5::run()
 		glUniform3fv(glGetUniformLocation(program, "specular"), 1, glm::value_ptr(specular));
 		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
 		glUniform1f(glGetUniformLocation(program, "ground_scale"), ground_scale);
+		glUniform1f(glGetUniformLocation(program, "y_scale"), y_scale);
 	};
 	
 	//
@@ -205,11 +207,16 @@ edaf80::Assignment5::run()
 	bonobo::mesh_data const& car_glass = objects[2];
 
 		// quad
-	auto const quad = parametric_shapes::createQuad(500, 500);
+	auto const quad = parametric_shapes::createQuad(800, 800);
 	if (quad.vao == 0u) {
 		LogError("Failed to load quad");
 	}
 
+	// sphere
+	auto const sphere = parametric_shapes::createSphere(50, 50, 1);
+	if (quad.vao == 0u) {
+		LogError("Failed to load sphere");
+	}
 
 	//
 	// Set up node tree
@@ -231,6 +238,8 @@ edaf80::Assignment5::run()
 				car.add_child(&world_cam);
 		Node ground = Node();
 			world.add_child(&ground);
+		Node goal_sphere = Node();
+			world.add_child(&goal_sphere);
 		
 
 	//
@@ -238,10 +247,13 @@ edaf80::Assignment5::run()
 	//
 
 	// car
-	int ground_height =	terrainHeight(landscape, 0, 0, width_landscape, height_landscape, ground_scale);
-	glm::vec3 car_pos = glm::vec3(0, ground_scale*ground_height, 0)*world_scale; // TODO vary car_pos.y according to height map
+	int ground_height =	y_scale*terrainHeight(landscape, 0, 0, width_landscape, height_landscape, ground_scale);
+	glm::vec3 start_pos = glm::vec3(-520, ground_scale*ground_height, -265)*world_scale;
+	glm::vec3 car_pos = start_pos; // TODO vary car_pos.y according to height map
 	car.set_translation(car_pos);
 	float car_speed = 0.0f;
+	bool finished_race = false;
+	bool has_passed_keypoint = false;
 
 
 	// car rotation
@@ -254,7 +266,7 @@ edaf80::Assignment5::run()
 	car_ext.set_scaling(glm::vec3(10, 10, 10));
 	car_ext.set_rotation_y(glm::pi<float>());
 	car_ext.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
-	car_ext.set_program(&phong_shader, phong_set_uniforms);
+	car_ext.set_program(&car_shader, phong_set_uniforms);
 	GLuint const car_ext_texture = bonobo::loadTexture2D("car_out_d.png");
 	car_ext.add_texture("diffuse_texture", car_ext_texture, GL_TEXTURE_2D);
 
@@ -263,7 +275,7 @@ edaf80::Assignment5::run()
 	car_int.set_scaling(glm::vec3(10, 10, 10));
 	car_int.set_rotation_y(glm::pi<float>());
 	car_int.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
-	car_int.set_program(&phong_shader, phong_set_uniforms);
+	car_int.set_program(&car_shader, phong_set_uniforms);
 	GLuint const car_in_texture = bonobo::loadTexture2D("car_in_d.png");
 	car_int.add_texture("diffuse_texture", car_in_texture, GL_TEXTURE_2D);
 
@@ -272,7 +284,7 @@ edaf80::Assignment5::run()
 	car_gl.set_scaling(glm::vec3(10, 10, 10));
 	car_gl.set_rotation_y(glm::pi<float>());
 	car_gl.set_translation(glm::vec3(0, 9, 0)); // TODO can we get the objects size?
-	car_gl.set_program(&phong_shader, phong_set_uniforms);
+	car_gl.set_program(&car_shader, phong_set_uniforms);
 	car_gl.add_texture("diffuse_texture", car_ext_texture, GL_TEXTURE_2D);
 
 
@@ -293,18 +305,29 @@ edaf80::Assignment5::run()
 	ground.set_translation(glm::vec3(0, 0, 0));
 	ground.set_program(&terrain_shader, phong_set_uniforms);
 	ground.add_texture("height_map", height_map, GL_TEXTURE_2D);
-	GLuint const ground_diffuse = bonobo::loadTexture2D("checkers.png");
+	GLuint const ground_diffuse = bonobo::loadTexture2D("terrain/terrain_color.png");
 	ground.add_texture("diffuse_tex", ground_diffuse, GL_TEXTURE_2D);
 	GLuint const road_alpha = bonobo::loadTexture2D(road_filename);
 	ground.add_texture("road_alpha", road_alpha, GL_TEXTURE_2D);
+	GLuint const ground_normal = bonobo::loadTexture2D("terrain/terrain_normal.png");
+	ground.add_texture("normal_map", ground_normal, GL_TEXTURE_2D);
+	GLuint const ground_normal_hr = bonobo::loadTexture2D("terrain/terrain_normal_hr.png");
+	ground.add_texture("normal_map_hr", ground_normal_hr, GL_TEXTURE_2D);
 
+	// goal sphere
+	goal_sphere.set_geometry(sphere);
+	glm::vec3 goal_pos = glm::vec3(-520, ground_scale*ground_height, -303)*world_scale;
+	float goal_radius = 75 * world_scale;
+	goal_sphere.set_scaling(glm::vec3(1.0)*goal_radius);
+	goal_sphere.set_translation(goal_pos);
+	goal_sphere.set_program(&phong_shader, phong_set_uniforms);
 
 	glEnable(GL_DEPTH_TEST);
 
 	// Enable face culling to improve performance:
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	//glCullFace(GL_FRONT);
-	//glCullFace(GL_BACK);
+	glCullFace(GL_BACK);
 
 
 	f64 ddeltatime;
@@ -312,6 +335,8 @@ edaf80::Assignment5::run()
 	int currFPS = 0;
 	double nowTime, lastTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
+	double startTime = GetTimeMilliseconds();
+	double finishTime = 0.0;
 
 	bool show_logs = false;
 	bool show_gui = true;
@@ -408,11 +433,19 @@ edaf80::Assignment5::run()
 		}
 		// move car_pos
 		car_pos += glm::normalize(car_dir) * (float)(ddeltatime * car_speed*0.001);
-		car_pos.y = terrainHeight(landscape, car_pos.x, car_pos.z, width_landscape, height_landscape, ground_scale)*ground_scale;
+		car_pos.y = y_scale*terrainHeight(landscape, car_pos.x, car_pos.z, width_landscape, height_landscape, ground_scale)*ground_scale;
 		// update car
 		car.set_translation(car_pos);
 		car_rot.rotate_y(theta);
-
+		// has passed keypoint
+		if (car_pos.x > 197 * world_scale) {
+			has_passed_keypoint = true;
+		}
+		// finished race
+		if (has_passed_keypoint && glm::distance(car_pos, start_pos) < 20) {
+			finished_race = true;
+			finishTime = nowTime;
+		}
 		// print car pos
 		//printf("\033c");
 		//printf("node center:\n[%f, %f, %f]\n \n", car_pos.x, car_pos.y, car_pos.z);
@@ -462,7 +495,7 @@ edaf80::Assignment5::run()
 			car_int.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_int.get_transform());
 			car_gl.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_gl.get_transform());
 			ground.render(mCamera.GetWorldToClipMatrix(), ground.get_transform());
-
+			goal_sphere.render(mCamera.GetWorldToClipMatrix(), goal_sphere.get_transform());
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -475,6 +508,22 @@ edaf80::Assignment5::run()
 			std::string FC = std::to_string(1000.0/ddeltatime);
 			ImGui::Text(FC.c_str());
 			ImGui::Text(std::to_string(currFPS).c_str());
+		}
+		ImGui::End();
+		bool opened2 = ImGui::Begin("Scene Control", &opened2, ImVec2(500, 50), -5.0f, 0);
+		if (opened2) {
+			ImGui::SliderFloat3("Light Position", glm::value_ptr(light_position), -8000.0f, 8000.0f);
+			ImGui::SliderFloat("y_scale", &y_scale, 0.0f, 2.0f);
+		}
+		bool opened3 = ImGui::Begin("Elapsed time", &opened3, ImVec2(200, 100), -2.0f, 0);
+		if (opened3) {
+			ImGui::Text((std::to_string((nowTime - startTime)/1000.0) + " s").c_str());
+			std::string ifFinished = "FINISHED! time: " + std::to_string(finishTime / 1000.0) + " s";
+			ImGui::Text((finished_race ? ifFinished.c_str() : "hej"));
+		}
+		bool opened4 = ImGui::Begin("Car position", &opened4, ImVec2(200, 100), -2.0f, 0);
+		if (opened3) {
+			ImGui::Text((std::to_string(car_pos.x) + ", " + std::to_string(car_pos.y) + ", " + std::to_string(car_pos.z) ).c_str());
 		}
 		ImGui::End();
 		if (show_logs)
