@@ -22,5 +22,6 @@ void main()
 	vs_out.normal = (normal_model_to_world * vec4(normal,0.0)).xyz;
 	vs_out.V = camera_position - worldVertex;
 
-	gl_Position = vertex_world_to_clip * vertex_model_to_world * vec4(vertex,1.0);
+	vec4 out_pos = vertex_world_to_clip * vertex_model_to_world * vec4(vertex + camera_position,1.0);
+	gl_Position = vec4(out_pos.xyz, out_pos.z + 0.1);
 }

@@ -16,12 +16,9 @@ uniform float ground_scale;
 uniform float y_scale;
 
 uniform sampler2D height_map;
-uniform sampler2D normal_map;
+//uniform sampler2D normal_map;
 
 out VS_OUT {
-  //vec3 normal;
-  //vec3 tangent;
-  //vec3 binormal;
   vec3 L;
   vec3 V;
   vec2 texcoord;
@@ -47,13 +44,8 @@ void main()
   vec3 vertex_new = vec3(vertex.x, y_new, vertex.z);
   vec3 worldVertex = vec3(vertex_model_to_world * vec4(vertex_new, 1.0));
 
-
-  //vec3 N = (normal_model_to_world * vec4(2*texture(normal_map, texcoord.xy).grb - vec3(1.0f), 0.0)).xyz;
-  //vs_out.normal = normalize(N);// normalize(vec3(normal_model_to_world * vec4(normal_new, 0.0)));
   vs_out.texcoord = texcoord.xy;
-  //vs_out.tangent = normalize(vec3(0, -N.z, 1));
-  //vs_out.binormal = normalize(vec3(1, -N.x, 0));
-  vs_out.V = normalize(camera_position - worldVertex);
+  vs_out.V = camera_position - worldVertex;
   vs_out.L = normalize(light_position - worldVertex);
   vs_out.distL = length(light_position - worldVertex);
   gl_Position = vertex_world_to_clip * vertex_model_to_world * vec4(vertex_new, 1.0);
