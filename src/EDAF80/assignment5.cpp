@@ -46,20 +46,20 @@ edaf80::Assignment5::~Assignment5()
 	Log::View::Destroy();
 }
 
-float terrainHeight(std::vector<unsigned char> image, float x, float z, int width, int height, float scale) {
+float terrainHeight(std::vector<unsigned char> *image, float x, float z, int width, int height, float scale) {
 	if (x > scale || x < -scale || z > scale || z < -scale)
 		return 0u;
 	//if (x < -50)
 	//	int bp = 0;
 	 //TODO interpolate between pixels
 
-	//float delta = 4.0f;
-	//int u_1 = glm::clamp( ((-(x-delta) / scale) + 1)/2, 0.0f, 1.0f )*(width - 1);
+	float delta = 10.0f;
+	int u_1 = glm::clamp( ((-(x-delta) / scale) + 1)/2, 0.0f, 1.0f )*(width - 1);
 	int u = ((-(x) / scale) + 1) *(height - 1) / 2;
-	//int u1 = glm::clamp( ((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
-	//int v_1 = glm::clamp( (((z-delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
+	int u1 = glm::clamp( ((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
+	int v_1 = glm::clamp( (((z-delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 	int v = ((z / scale) + 1)*(width - 1) / 2;
-	//int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
+	int v1 = glm::clamp( (((z+delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 
 	//int v = ((x / scale) + 1)*(height - 1) / 2;
 	//int u = ((z / scale) + 1)*(width - 1) / 2;
@@ -72,36 +72,55 @@ float terrainHeight(std::vector<unsigned char> image, float x, float z, int widt
 	//printf("index:, %f, v:, %f, u:, %f, p_0_0:, %d", (height - 1)*u*width + (width - 1)*v, v, u, p_0_0);
 
 	//int offset = 100;
-	//int p_1_1 = image.at(height*u_1 + v_1);
-	//int p_1_0 = image.at(height*u_1 + v);
-	//int p_11 = image.at(height*u_1 + v1);
-	//int p_0_1 = image.at(height*u + v_1);
-	int p_0_0 = image.at(u*width + v);
-	//int p_01 = image.at(height*u + v1);
-	//int p1_1 = image.at(height*u1 + v_1);
-	//int p1_0 = image.at(height*u1 + v);
-	//int p11 = image.at(height*u1 + v1);
+	int p_1_1 = image->at(height*u_1 + v_1);
+	int p_1_0 = image->at(height*u_1 + v);
+	int p_11 = image->at(height*u_1 + v1);
+	int p_0_1 = image->at(height*u + v_1);
+	int p_0_0 = image->at(u*width + v);
+	int p_01 = image->at(height*u + v1);
+	int p1_1 = image->at(height*u1 + v_1);
+	int p1_0 = image->at(height*u1 + v);
+	int p11 = image->at(height*u1 + v1);
 
-	//int mean = (p_1_1 + p_1_0 + p_11 +
-	//			p_0_1 + p_0_0 + p_01 +
-	//			p1_1 + p1_0 + p11) / 9;
+	int mean = (p_1_1 + p_1_0 + p_11 +
+				p_0_1 + p_0_0 + p_01 +
+				p1_1 + p1_0 + p11) / 9;
 	
-	return ((float) p_0_0)/255.0f;// image.at(height*u + v)*offset / 255;
+	return ((float) mean)/255.0f;// image.at(height*u + v)*offset / 255;
 }
 
-glm::vec3 normalDir(std::vector<glm::vec3>* imagepntr, float x, float z, int width, int height, float scale) {
+glm::vec3 normalDir(std::vector<glm::vec3>* image, float x, float z, int width, int height, float scale) {
 	if (x > scale || x < -scale || z > scale || z < -scale) {
 		return glm::vec3(0.0f,0.0f,0.0f);
 	}
 
+	//int u = ((-(x) / scale) + 1) *(height - 1) / 2;
+	//int v = ((z / scale) + 1)*(width - 1) / 2;
+	float delta = 30.0f;
+	int u_1 = glm::clamp(((-(x - delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
 	int u = ((-(x) / scale) + 1) *(height - 1) / 2;
+	int u1 = glm::clamp(((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
+	int v_1 = glm::clamp((((z - delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 	int v = ((z / scale) + 1)*(width - 1) / 2;
+	int v1 = glm::clamp((((z + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 
-	//auto vec = imagepntr->at[u*width + v];
-	//int g = imagepntr->at[u*width + v];
-	//int b = imagepntr->at[u*width + v];
-	//
-	return imagepntr->at(u*width + v);//glm::vec3(((float)vec.x) / 255.0f, ((float)vec.y) / 255.0f, ((float)vec.z) / 255.0f);
+	glm::vec3 p_1_1 = image->at(height*u_1 + v_1);
+	glm::vec3 p_1_0 = image->at(height*u_1 + v);
+	glm::vec3 p_11 = image->at(height*u_1 + v1);
+	glm::vec3 p_0_1 = image->at(height*u + v_1);
+	glm::vec3 p_0_0 = image->at(u*width + v);
+	glm::vec3 p_01 = image->at(height*u + v1);
+	glm::vec3 p1_1 = image->at(height*u1 + v_1);
+	glm::vec3 p1_0 = image->at(height*u1 + v);
+	glm::vec3 p11 = image->at(height*u1 + v1);
+
+	glm::vec3 mean = (p_1_1 + p_1_0 + p_11 +
+		p_0_1 + p_0_0 + p_01 +
+		p1_1 + p1_0 + p11) / 9.0f;
+
+	
+	auto returnValue = image->at(u*width + v);
+	return returnValue;
 }
 
 glm::vec3 normalDirTest(std::vector<unsigned char> image, float x, float z, int width, int height, float scale) {
@@ -132,7 +151,7 @@ edaf80::Assignment5::run()
 	mCamera.mWorld.SetTranslate(glm::vec3(100.0f, 200.0f, 200.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.25f;
-	mCamera.SetProjection(mCamera.GetFov(), mCamera.GetAspect(), 1.0f, 700.0f*world_scale);
+	mCamera.SetProjection(mCamera.GetFov(), mCamera.GetAspect(), 25.0f*world_scale, 700.0f*world_scale);
 
 	int chosen_cam = 2;
 
@@ -173,7 +192,15 @@ edaf80::Assignment5::run()
 	if (car_window_shader == 0u) {
 		LogError("Failed to load car window shader");
 	}
-	
+
+	GLuint goal_ball_shader = 0u;
+	program_manager.CreateAndRegisterProgram({ { ShaderType::vertex, "EDAF80/goal_ball.vert" },
+											   { ShaderType::fragment, "EDAF80/goal_ball.frag" } },
+		goal_ball_shader);
+	if (goal_ball_shader == 0u) {
+		LogError("Failed to load goal ball shader");
+	}
+
 	//
 	// set up height
 	//
@@ -220,10 +247,9 @@ edaf80::Assignment5::run()
 	int tracker = 0;
 	std::vector< glm::vec3 > normalVec(rows, glm::vec3(cols));
 	for (int i = 0; i < width_normal * height_normal; i++) {
-		normalVec[i][0] = normal[tracker]; 
+		normalVec[i][0] = normal[tracker++]; 
 		normalVec[i][1] = normal[tracker++];
 		normalVec[i][2] = normal[tracker++];
-		tracker++;
 		/*printf("v[i][0]: %f, v[i][1]: %f, v[i][2]: %f, tracker: %d\n", v[i][0], v[i][1], v[i][2], tracker);
 		system("PAUSE");*/
 	}
@@ -232,7 +258,7 @@ edaf80::Assignment5::run()
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 	//printf("width: %d, height: %d\nsize: %d\n", width_normal, height_normal, normal.size());
 
-	//glm::vec3 vec = normalDir(v, 3900,3900, width_normal, height_normal, ground_scale);
+    //glm::vec3 vec = normalDir(v, 3900,3900, width_normal, height_normal, ground_scale);
 	//printf("vec[0]: %f, vec[1]: %f, vec[2]: %f", vec[0], vec[1], vec[2]);
 
 	//
@@ -244,8 +270,10 @@ edaf80::Assignment5::run()
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
 	auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	auto shininess = 15.0f;
-	auto y_scale = 0.33f;
-	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &ground_scale, &y_scale](GLuint program) {
+	auto y_scale = 0.37f;
+	auto time = 0.0f;
+	glm::vec3 sky_color = glm::vec3(0.5, 0.5, 0.5);
+	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &ground_scale, &y_scale, &time, &sky_color](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
 		glUniform3fv(glGetUniformLocation(program, "ambient"), 1, glm::value_ptr(ambient));
@@ -254,6 +282,8 @@ edaf80::Assignment5::run()
 		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
 		glUniform1f(glGetUniformLocation(program, "ground_scale"), ground_scale);
 		glUniform1f(glGetUniformLocation(program, "y_scale"), y_scale);
+		glUniform1f(glGetUniformLocation(program, "time"), time);
+		glUniform3fv(glGetUniformLocation(program, "sky_color"), 1, glm::value_ptr(sky_color));
 	};
 	
 	//
@@ -293,14 +323,16 @@ edaf80::Assignment5::run()
 			world.add_child(&car);
 			Node car_rot = Node();
 				car.add_child(&car_rot);
-				Node car_ext = Node();
-					car_rot.add_child(&car_ext);
-				Node car_int = Node();
-					car_rot.add_child(&car_int);
-				Node car_gl = Node();
-					car_rot.add_child(&car_gl);
-				Node car_cam = Node();
-					car_rot.add_child(&car_cam);
+				Node car_rot_XZ = Node();
+					car_rot.add_child(&car_rot_XZ);
+					Node car_ext = Node();
+						car_rot_XZ.add_child(&car_ext);
+					Node car_int = Node();
+						car_rot_XZ.add_child(&car_int);
+					Node car_gl = Node();
+						car_rot_XZ.add_child(&car_gl);
+					Node car_cam = Node();
+						car_rot_XZ.add_child(&car_cam);
 			Node world_cam = Node();
 				car.add_child(&world_cam);
 		Node ground = Node();
@@ -314,8 +346,9 @@ edaf80::Assignment5::run()
 	//
 
 	// car
-	int ground_height =	y_scale*terrainHeight(landscape, 0, 0, width_landscape, height_landscape, ground_scale);
-	glm::vec3 start_pos = glm::vec3(-520, ground_scale*ground_height, -265)*world_scale;
+	glm::vec2 start_pos_xz = glm::vec2(-520, -265)*world_scale;
+	float ground_height = y_scale*terrainHeight(&landscape, start_pos_xz.x, start_pos_xz.y, width_landscape, height_landscape, ground_scale);
+	glm::vec3 start_pos = glm::vec3(start_pos_xz.x, ground_scale*ground_height, start_pos_xz.y);
 	glm::vec3 car_pos = start_pos; // TODO vary car_pos.y according to height map
 	car.set_translation(car_pos);
 	float car_speed = 0.0f;
@@ -359,7 +392,7 @@ edaf80::Assignment5::run()
 	GLuint const height_map = bonobo::loadTexture2D(landscape_filename);
 	
 	// car camera ("first person"), chosen camera: 2
-	car_cam.set_translation(glm::vec3(0, 50, 150));
+	car_cam.set_translation(glm::vec3(0, 100, 250));
 
 	// world camera ("third person"), chosen camera: 1
 	world_cam.set_translation(glm::vec3(0, 50, 100)*world_scale);
@@ -372,32 +405,52 @@ edaf80::Assignment5::run()
 	ground.set_scaling(glm::vec3(1, 1, 1)*ground_scale);
 	ground.set_translation(glm::vec3(0, 0, 0));
 	ground.set_program(&terrain_shader, phong_set_uniforms);
+			// heightmap
 	ground.add_texture("height_map", height_map, GL_TEXTURE_2D);
-	GLuint const ground_diffuse = bonobo::loadTexture2D("terrain/terrain_color.png");
+			// diffuse rock
+	GLuint const ground_diffuse = bonobo::loadTexture2D("terrain/terrain_color_hr.png");
 	ground.add_texture("diffuse_tex", ground_diffuse, GL_TEXTURE_2D);
-	GLuint const road_alpha = bonobo::loadTexture2D(road_filename);
-	ground.add_texture("road_alpha", road_alpha, GL_TEXTURE_2D);
-	GLuint const ground_normal = bonobo::loadTexture2D("terrain/terrain_normal.png");
-	ground.add_texture("normal_map", ground_normal, GL_TEXTURE_2D);
+			// road alpha
+	//GLuint const road_alpha = bonobo::loadTexture2D(road_filename);
+	//ground.add_texture("road_alpha", road_alpha, GL_TEXTURE_2D);
+	//GLuint const ground_normal = bonobo::loadTexture2D("terrain/terrain_normal.png");
+	//ground.add_texture("normal_map", ground_normal, GL_TEXTURE_2D);
+			// normal map
 	GLuint const ground_normal_hr = bonobo::loadTexture2D("terrain/terrain_normal_hr.png");
 	ground.add_texture("normal_map_hr", ground_normal_hr, GL_TEXTURE_2D);
+			// water alpha
+	GLuint const water_alpha = bonobo::loadTexture2D("terrain/water_alpha_hr.png");
+	ground.add_texture("water_alpha", water_alpha, GL_TEXTURE_2D);
+			// cube map
+	std::string scene = "snow/";
+	auto my_cube_map_id = bonobo::loadTextureCubeMap(scene + "posx.png", scene + "negx.png",
+		scene + "posy.png", scene + "negy.png",
+		scene + "posz.png", scene + "negz.png", true);
+	ground.add_texture("my_cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
+			// water normal waves
+	GLuint const water_normal_texture = bonobo::loadTexture2D("waves2.png");
+	ground.add_texture("water_normal", water_normal_texture, GL_TEXTURE_2D);
+			// grass texture
+	GLuint const grass_texture = bonobo::loadTexture2D("grass.png");
+	ground.add_texture("grass_texture", grass_texture, GL_TEXTURE_2D);
 
 	// goal sphere
 	goal_sphere.set_geometry(sphere);
-	glm::vec3 goal_pos = glm::vec3(-520, ground_scale*ground_height, -303)*world_scale;
+	glm::vec3 goal_pos = glm::vec3(-520*world_scale, ground_scale*ground_height, -227*world_scale);
 	float goal_radius = 75 * world_scale;
 	goal_sphere.set_scaling(glm::vec3(1.0)*goal_radius);
 	goal_sphere.set_translation(goal_pos);
-	goal_sphere.set_program(&phong_shader, phong_set_uniforms);
+	goal_sphere.set_program(&goal_ball_shader, phong_set_uniforms);
 
+	// sky
 	glEnable(GL_DEPTH_TEST);
+	
 
 	// Enable face culling to improve performance:
 	glEnable(GL_CULL_FACE);
 	//glCullFace(GL_FRONT);
 	glCullFace(GL_BACK);
-	//glCullFace(GL_BACK);
-	glDisable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
@@ -408,6 +461,8 @@ edaf80::Assignment5::run()
 	double fpsNextTick = lastTime + 1000.0;
 	double startTime = GetTimeMilliseconds();
 	double finishTime = 0.0;
+
+	bool has_started = false;
 
 	bool show_logs = false;
 	bool show_gui = true;
@@ -422,6 +477,7 @@ edaf80::Assignment5::run()
 			fpsSamples = 0;
 		}
 		fpsSamples++;
+
 
 		auto& io = ImGui::GetIO();
 		inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
@@ -448,6 +504,11 @@ edaf80::Assignment5::run()
 		//
 		// Inputs, keyboard etc.
 		//
+		if (!has_started && inputHandler.GetKeycodeState(GLFW_KEY_UP) & PRESSED) {
+			has_started = true;
+			startTime = nowTime;
+		}
+
 		glm::mat4 rot = glm::mat4(1.0f);
 		float theta = 0.0;
 		if (inputHandler.GetKeycodeState(GLFW_KEY_RIGHT) & PRESSED) {
@@ -462,9 +523,9 @@ edaf80::Assignment5::run()
 			car_dir = (rot * glm::vec4(car_dir, 1));
 			car_dir = glm::normalize(glm::vec3(car_dir.x, car_dir.y, car_dir.z));
 		}
-		if (inputHandler.GetKeycodeState(GLFW_KEY_UP) & PRESSED)
+		if (has_started && inputHandler.GetKeycodeState(GLFW_KEY_UP) & PRESSED)
 			car_speed = glm::clamp(car_speed + 400.0f*(float)ddeltatime*0.001f, -800.0f, 800.0f);
-		if (inputHandler.GetKeycodeState(GLFW_KEY_DOWN) & PRESSED)
+		if (has_started && inputHandler.GetKeycodeState(GLFW_KEY_DOWN) & PRESSED)
 			car_speed = glm::clamp(car_speed - 400.0f*(float)ddeltatime*0.001f, -800.0f, 800.0f);
 		if (inputHandler.GetKeycodeState(GLFW_KEY_1) & PRESSED)
 			chosen_cam = 1;
@@ -496,15 +557,26 @@ edaf80::Assignment5::run()
 		car_speed = glm::sign(car_speed)
 			* glm::max(glm::abs(car_speed) - 200.0f*(float)ddeltatime*0.001f, 0.0f);
 		// outside road
-		float on_road = ((float)terrainHeight(road, car_pos.x, car_pos.z, width_road, height_road, ground_scale));
+		float on_road = ((float)terrainHeight(&road, car_pos.x, car_pos.z, width_road, height_road, ground_scale));
 		if (0.5 > on_road) {
-			if (glm::abs(car_speed) > 4000.0f*(float)ddeltatime*0.001f) {
+			if (glm::abs(car_speed) > 400.0f) {
+				car_speed = glm::sign(car_speed) * (glm::abs(car_speed) - 750.0f*(float)ddeltatime*0.001f);
+			}else if (glm::abs(car_speed) > 4000.0f*(float)ddeltatime*0.001f) {
 				car_speed = glm::sign(car_speed) * (glm::abs(car_speed) - 500.0f*(float)ddeltatime*0.001f);
 			}
 		}
 		// move car_pos
 		car_pos += glm::normalize(car_dir) * (float)(ddeltatime * car_speed*0.001);
-		car_pos.y = y_scale*terrainHeight(landscape, car_pos.x, car_pos.z, width_landscape, height_landscape, ground_scale)*ground_scale;
+		car_pos.y = y_scale*terrainHeight(&landscape, car_pos.x, car_pos.z, width_landscape, height_landscape, ground_scale)*ground_scale;
+		// rotate car
+		glm::vec3 n = normalDir(&normalVec, car_pos.x, car_pos.z, width_landscape, height_landscape, ground_scale);
+		n = 2.0f * n/255.0f - 1.0f;
+		n = glm::normalize(glm::vec3(n.g, n.b, n.r));
+		float cosPhi = 1/glm::length(glm::vec3(car_dir.x, -glm::dot(n, car_dir) / n.y, car_dir.z));
+		float phi = glm::acos(cosPhi);
+		float rotSign = glm::sign(-glm::dot(n, car_dir) / n.y);
+		car_rot_XZ.set_rotation_x(rotSign*phi);
+
 		// update car
 		car.set_translation(car_pos);
 		car_rot.rotate_y(theta);
@@ -513,9 +585,9 @@ edaf80::Assignment5::run()
 			has_passed_keypoint = true;
 		}
 		// finished race
-		if (has_passed_keypoint && glm::distance(car_pos, start_pos) < 20) {
+		if (!finished_race && has_passed_keypoint && glm::distance(car_pos, goal_pos) < goal_radius) {
 			finished_race = true;
-			finishTime = nowTime;
+			finishTime = nowTime - startTime;
 		}
 
 		// print car pos
@@ -527,7 +599,7 @@ edaf80::Assignment5::run()
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
 		glViewport(0, 0, framebuffer_width, framebuffer_height);
 		glClearDepthf(1.0f);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(sky_color.r, sky_color.g, sky_color.b, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		//
@@ -564,9 +636,9 @@ edaf80::Assignment5::run()
 		//
 		if (!shader_reload_failed) {
 			
-			car_ext.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_ext.get_transform());
-			car_int.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_int.get_transform());
-			car_gl.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform()  * car_gl.get_transform());
+			car_ext.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_rot_XZ.get_transform() * car_ext.get_transform());
+			car_int.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform() * car_rot_XZ.get_transform() * car_int.get_transform());
+			car_gl.render(mCamera.GetWorldToClipMatrix(), car.get_transform() * car_rot.get_transform()  * car_rot_XZ.get_transform() * car_gl.get_transform());
 			ground.render(mCamera.GetWorldToClipMatrix(), ground.get_transform());
 			goal_sphere.render(mCamera.GetWorldToClipMatrix(), goal_sphere.get_transform());
 		}
@@ -588,11 +660,13 @@ edaf80::Assignment5::run()
 			ImGui::SliderFloat3("Light Position", glm::value_ptr(light_position), -8000.0f, 8000.0f);
 			ImGui::SliderFloat("y_scale", &y_scale, 0.0f, 2.0f);
 		}
-		bool opened3 = ImGui::Begin("Elapsed time", &opened3, ImVec2(200, 100), -2.0f, 0);
+		bool opened3 = ImGui::Begin("Info", &opened3, ImVec2(200, 100), -2.0f, 0);
 		if (opened3) {
-			ImGui::Text((std::to_string((nowTime - startTime)/1000.0) + " s").c_str());
+			ImGui::Text(has_started ? ("Elapsed time: " + std::to_string((nowTime - startTime)/1000.0) + " s").c_str() : "Press UP key to start!");
+			ImGui::Text((has_passed_keypoint ? "OK" : "not passed keypoint yet"));
+			ImGui::Text(("Car speed: " + std::to_string(car_speed)).c_str());
 			std::string ifFinished = "FINISHED! time: " + std::to_string(finishTime / 1000.0) + " s";
-			ImGui::Text((finished_race ? ifFinished.c_str() : "hej"));
+			ImGui::Text((finished_race ? ifFinished.c_str() : ""));
 		}
 		bool opened4 = ImGui::Begin("Car position", &opened4, ImVec2(200, 100), -2.0f, 0);
 		if (opened3) {
@@ -606,6 +680,7 @@ edaf80::Assignment5::run()
 
 		glfwSwapBuffers(window);
 		lastTime = nowTime;
+		time += 60.0f*(float)ddeltatime*0.001f;
 	}
 }
 
