@@ -96,10 +96,10 @@ glm::vec3 normalDir(std::vector<glm::vec3>* image, float x, float z, int width, 
 
 	//int u = ((-(x) / scale) + 1) *(height - 1) / 2;
 	//int v = ((z / scale) + 1)*(width - 1) / 2;
-	float delta = 30.0f;
-	int u_1 = glm::clamp(((-(x - delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
+	float delta = 10.0f;
+	int u_1 = glm::clamp(((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
 	int u = ((-(x) / scale) + 1) *(height - 1) / 2;
-	int u1 = glm::clamp(((-(x + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
+	int u1 = glm::clamp(((-(x - delta) / scale) + 1) / 2, 0.0f, 1.0f)*(width - 1);
 	int v_1 = glm::clamp((((z - delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
 	int v = ((z / scale) + 1)*(width - 1) / 2;
 	int v1 = glm::clamp((((z + delta) / scale) + 1) / 2, 0.0f, 1.0f)*(height - 1);
@@ -117,10 +117,12 @@ glm::vec3 normalDir(std::vector<glm::vec3>* image, float x, float z, int width, 
 	glm::vec3 mean = (p_1_1 + p_1_0 + p_11 +
 		p_0_1 + p_0_0 + p_01 +
 		p1_1 + p1_0 + p11) / 9.0f;
+	//float dFdx = scale * (s[2]-s[0] + 2*(s[5]-s[3]) + s[8]-s[6]);
+    //float dFdz = scale * (s[6]-s[0] + 2*(s[7]-s[1]) + s[8]-s[2]);
 
 	
 	auto returnValue = image->at(u*width + v);
-	return returnValue;
+	return mean;// returnValue;
 }
 
 glm::vec3 normalDirTest(std::vector<unsigned char> image, float x, float z, int width, int height, float scale) {
@@ -232,7 +234,7 @@ edaf80::Assignment5::run()
 	//
 	// load normal map
 	//
-	std::string normal_filename = "terrain/terrain_normal.png";
+	std::string normal_filename = "terrain/terrain_normal_hr_smooth2.png";
 	u32 width_normal, height_normal;
 	auto const normal_path = config::resources_path("textures/" + normal_filename);
 	std::vector<unsigned char> normal;
@@ -264,7 +266,7 @@ edaf80::Assignment5::run()
 	//
 	// set up uniform variables
 	//
-	auto light_position = glm::vec3(1000.0f, 1000.0f, 1000.0f)*world_scale;
+	auto light_position = glm::vec3(1000.0f, 1000.0f, 500.0f)*world_scale;
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto ambient = glm::vec3(0.2f, 0.1f, 0.1f);
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
@@ -573,9 +575,19 @@ edaf80::Assignment5::run()
 		n = 2.0f * n/255.0f - 1.0f;
 		n = glm::normalize(glm::vec3(n.g, n.b, n.r));
 		float cosPhi = 1/glm::length(glm::vec3(car_dir.x, -glm::dot(n, car_dir) / n.y, car_dir.z));
-		float phi = glm::acos(cosPhi);
-		float rotSign = glm::sign(-glm::dot(n, car_dir) / n.y);
-		car_rot_XZ.set_rotation_x(rotSign*phi);
+		//float phi = glm::acos(cosPhi);
+		//float rotSign = glm::sign(-glm::dot(n, car_dir) / n.y);
+		auto frontY = y_scale * terrainHeight(&landscape, car_pos.x + 50*car_dir.x, car_pos.z + 50*car_dir.z, width_landscape, height_landscape, ground_scale)*ground_scale;
+		auto backY = y_scale * terrainHeight(&landscape, car_pos.x - 50*car_dir.x, car_pos.z - 50*car_dir.z, width_landscape, height_landscape, ground_scale)*ground_scale;
+		auto diffFrontBack = (frontY - backY) / 100.0;
+		auto phi = glm::atan(diffFrontBack);
+		car_rot_XZ.set_rotation_x(phi);
+
+		auto rightY = y_scale * terrainHeight(&landscape, car_pos.x + 50 * car_dir.z, car_pos.z - 50 * car_dir.z, width_landscape, height_landscape, ground_scale)*ground_scale;
+		auto leftY = y_scale * terrainHeight(&landscape, car_pos.x - 50 * car_dir.z, car_pos.z + 50 * car_dir.x, width_landscape, height_landscape, ground_scale)*ground_scale;
+		auto diffSideToSide = (rightY - leftY) / 100.0;
+		auto phi2 = glm::atan(diffSideToSide);
+		car_rot_XZ.set_rotation_z(-phi2);
 
 		// update car
 		car.set_translation(car_pos);

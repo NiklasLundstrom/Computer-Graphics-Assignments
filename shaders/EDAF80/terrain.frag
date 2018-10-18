@@ -43,7 +43,7 @@ void main()
     vec3 grass = texture(grass_texture, fs_in.texcoord*100).rgb;
     vec3 diffuse =  dif * (dif_texture * grass.g * 3);
     // ambient
-    vec3 ambient = 0.5*dif_texture;
+    vec3 ambient = 0.5*(dif_texture * grass.g*2);
 
     frag_color.rgb = ambient + diffuse;
     frag_color.a = 1.0;
